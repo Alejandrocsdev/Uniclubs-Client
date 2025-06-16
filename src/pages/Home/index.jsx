@@ -3,13 +3,13 @@ import S from './style.module.css'
 // Libraries
 import { Link } from 'react-router-dom'
 
-function Landing() {
+function Home() {
   return (
     <main className={S.main}>
-      <p>This is Landing page</p>
-      <Link to="/home">Go to Home page</Link>
+      <p>This is Home page</p>
+      <Link to="/">Go to Landing page</Link>
     </main>
   )
 }
 
-export default Landing
+export default Home
