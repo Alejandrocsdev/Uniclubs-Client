@@ -1,0 +1,7 @@
+.container {
+  min-height: calc(100dvh);
+  background: var(--primary-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -1,0 +1,116 @@
+.main {
+  min-height: calc(100dvh - 2.5rem * 2);
+  width: calc(100dvw - 2.5rem * 2);
+  background-color: hsla(0, 0%, 100%, 0.7);
+  border-radius: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.title {
+  font-size: 3rem;
+  position: absolute;
+  top: 4rem;
+}
+
+.card {
+  width: 25rem;
+  padding: 2.5rem 2.5rem 0.5rem;
+  background: hsla(0, 0%, 100%, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.25rem 2.5rem hsla(0, 0%, 0%, 0.1);
+}
+
+.cardTitle {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
+/* .form {} */
+
+.inputContainer {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem;
+  border: 0.125rem solid hsl(0, 0%, 85%);
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: hsl(210, 100%, 65%);
+  box-shadow: 0 0 0.625rem hsla(210, 100%, 65%, 0.3);
+}
+
+.inputError {
+  padding: calc((2rem - 1rem) / 2) 1rem;
+  color: var(--error-red);
+  position: absolute;
+}
+
+.reset,
+.switch {
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.text {
+  color: hsl(0, 0%, 20%);
+}
+
+.linkContainer {
+  width: 3.5rem;
+  text-align: center;
+}
+
+.link {
+  color: hsl(210, 100%, 45%);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: hsl(210, 100%, 65%);
+}
+
+.submit {
+  width: 100%;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, hsl(210, 100%, 65%) 0%, hsl(180, 100%, 50%) 100%);
+  color: hsl(0, 0%, 100%);
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit:hover {
+  background: linear-gradient(135deg, hsl(210, 100%, 55%) 0%, hsl(180, 100%, 40%) 100%);
+}
+
+.submit:active {
+  background: linear-gradient(135deg, hsl(210, 100%, 45%) 0%, hsl(180, 100%, 30%) 100%);
+}
+
+.formError {
+  margin: 0.5rem 0 2rem;
+  padding: 0.5rem;
+  color: var(--error-red);
+  background-color: var(--error-background);
+  border: 1px solid var(--error-red);
+  text-align: center;
+}

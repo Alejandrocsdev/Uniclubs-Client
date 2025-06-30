@@ -3,7 +3,7 @@ import S from './style.module.css'
 // Libraries
 import { Outlet } from 'react-router-dom'
 
-function Layout() {
+function AuthLayout() {
   return (
     <div className={S.container}>
       <Outlet />
@@ -11,4 +11,4 @@ function Layout() {
   )
 }
 
-export default Layout
+export default AuthLayout
