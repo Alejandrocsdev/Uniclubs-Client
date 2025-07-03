@@ -1,7 +1,7 @@
 // Libraries
 import { Link } from 'react-router-dom'
 // Custom Functions
-import { devErr } from '../../../utils/debug'
+import { devErr } from '../../../utils'
 
 function Anchor({ int, ext, style, target, onClick, children }) {
   if (int && ext) devErr('❌ [Anchor]: "int" and "ext" only one is allowed.')

@@ -2,7 +2,9 @@
 import './assets/css/font.css'
 import './assets/css/global.css'
 // Libraries
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+// Custom Functions
+import { MessageProvider } from './contexts/MessageContext'
 // Layout
 import AuthLayout from './layouts/AuthLayout'
 import MainLayout from './layouts/MainLayout'
@@ -16,17 +18,24 @@ import Home from './pages/Home'
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<AuthLayout />}>
-          <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/sign-up" element={<SignUp />} />
-          <Route path="/reset" element={<Reset />} />
-        </Route>
+      <MessageProvider>
+        <Routes>
+          {/* Auth routes */}
+          <Route element={<AuthLayout />}>
+            <Route path="/sign-in" element={<SignIn />} />
+            <Route path="/sign-up" element={<SignUp />} />
+            <Route path="/reset" element={<Reset />} />
+          </Route>
 
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-        </Route>
-      </Routes>
+          {/* Main routes */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+          </Route>
+
+          {/* Catch-all fallback route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </MessageProvider>
     </BrowserRouter>
   )
 }

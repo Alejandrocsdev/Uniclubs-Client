@@ -12,7 +12,6 @@ const iconMap = {
   faEyeSlash
 }
 
-// 圖示
 function Icon({ style, icon }) {
   const selected = iconMap[icon]
   return <FontAwesomeIcon className={style} icon={selected} />

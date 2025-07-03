@@ -30,34 +30,6 @@
   text-align: center;
 }
 
-/* .form {} */
-
-.inputContainer {
-  margin-bottom: 2rem;
-  position: relative;
-}
-
-.input {
-  width: 100%;
-  padding: 1rem;
-  border: 0.125rem solid hsl(0, 0%, 85%);
-  border-radius: 0.625rem;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-.input:focus {
-  outline: none;
-  border-color: hsl(210, 100%, 65%);
-  box-shadow: 0 0 0.625rem hsla(210, 100%, 65%, 0.3);
-}
-
-.inputError {
-  padding: calc((2rem - 1rem) / 2) 1rem;
-  color: var(--error-red);
-  position: absolute;
-}
-
 .reset,
 .switch {
   margin-bottom: 2rem;
@@ -104,13 +76,4 @@
 
 .submit:active {
   background: linear-gradient(135deg, hsl(210, 100%, 45%) 0%, hsl(180, 100%, 30%) 100%);
-}
-
-.formError {
-  margin: 0.5rem 0 2rem;
-  padding: 0.5rem;
-  color: var(--error-red);
-  background-color: var(--error-background);
-  border: 1px solid var(--error-red);
-  text-align: center;
 }

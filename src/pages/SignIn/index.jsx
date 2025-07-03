@@ -1,29 +1,45 @@
 // CSS Module
 import S from './style.module.css'
+// Libraries
+import { useNavigate } from 'react-router-dom'
+// Custom Functions
+import { axiosPublic } from '../../../api'
+import { devLog, devErr } from '../../../utils'
+import { useMessage } from '../../contexts/MessageContext'
 // Components
+import Form from '../../components/Form'
 import Icon from '../../components/Icon'
+import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
 
 function SignIn() {
+  const { setSucMsg, setErrMsg } = useMessage()
+  const navigate = useNavigate()
+
+  const onSubmit = async formData => {
+    try {
+      const { username, password } = formData
+      const { data } = await axiosPublic.post('/api/auth/sign-in/pwd', { username, password })
+      devLog(data)
+      setSucMsg('Sign in successfully.')
+      navigate('/')
+    } catch (error) {
+      devErr(error?.response?.data?.message || 'Unknown error')
+      setErrMsg('Sign in failed.')
+    }
+  }
+
   return (
     <main className={S.main}>
       <h1 className={S.title}>Welcome to Venue Booking</h1>
       <div className={S.card}>
         <h2 className={S.cardTitle}>Sign In</h2>
-        <form className={S.form}>
+        <Form onSubmit={onSubmit}>
           {/* Username */}
-          <div className={S.inputContainer}>
-            <input className={S.input} type="text" name="username" placeholder="Enter your Username" />
-            {/* Input Error */}
-            <div className={S.inputError}>Wrong</div>
-          </div>
+          <Input style={S.input} name="username" placeholder="Enter your Username" />
 
           {/* Password */}
-          <div className={S.inputContainer}>
-            <input className={S.input} type="password" name="password" placeholder="Enter your Password" />
-            {/* Input Error */}
-            <div className={S.inputError}>Wrong</div>
-          </div>
+          <Input style={S.input} type="password" name="password" placeholder="Enter your Password" />
 
           {/* Reset Password */}
           <div className={S.reset}>
@@ -47,10 +63,7 @@ function SignIn() {
               </Anchor>
             </div>
           </div>
-
-          {/* Form Error */}
-          <div className={S.formError}>Error</div>
-        </form>
+        </Form>
       </div>
     </main>
   )

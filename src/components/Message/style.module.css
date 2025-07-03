@@ -1,0 +1,22 @@
+.success,
+.error {
+  height: 2.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+}
+
+.success {
+  color: var(--success-green);
+  background-color: var(--success-background);
+  
+}
+
+.error {
+  color: var(--error-red);
+  background-color: var(--error-background);
+  z-index: 1;
+}
