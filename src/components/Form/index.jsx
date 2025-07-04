@@ -1,9 +1,13 @@
 // Libraries
 import { useForm, FormProvider } from 'react-hook-form'
+import { joiResolver } from '@hookform/resolvers/joi'
 
-function Form({ style, onSubmit, children }) {
+function Form({ style, onSubmit, schema, children }) {
   // Mode: onSubmit, onBlur, onChange, onTouched, all
-  const methods = useForm({ mode: 'onChange' })
+  const methods = useForm({
+    mode: 'onChange',
+    resolver: schema ? joiResolver(schema) : undefined
+  })
 
   return (
     <FormProvider {...methods}>

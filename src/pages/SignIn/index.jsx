@@ -4,11 +4,13 @@ import S from './style.module.css'
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
 import { axiosPublic } from '../../../api'
-import { devLog, devErr } from '../../../utils'
 import { useMessage } from '../../contexts/MessageContext'
+// Validations
+import { signInSchema } from '../../validations'
+// Utilities
+import { devLog, devErr } from '../../../utils'
 // Components
 import Form from '../../components/Form'
-import Icon from '../../components/Icon'
 import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
 
@@ -31,15 +33,14 @@ function SignIn() {
 
   return (
     <main className={S.main}>
-      <h1 className={S.title}>Welcome to Venue Booking</h1>
       <div className={S.card}>
         <h2 className={S.cardTitle}>Sign In</h2>
-        <Form onSubmit={onSubmit}>
+        <Form schema={signInSchema} onSubmit={onSubmit}>
           {/* Username */}
-          <Input style={S.input} name="username" placeholder="Enter your Username" />
+          <Input style={S.input} name="username" placeholder="Please enter your username" maxLength={16} />
 
           {/* Password */}
-          <Input style={S.input} type="password" name="password" placeholder="Enter your Password" />
+          <Input style={S.input} type="password" name="password" placeholder="Please enter your password" maxLength={16} />
 
           {/* Reset Password */}
           <div className={S.reset}>

@@ -1,16 +1,16 @@
 // Libraries
-import { createContext, useState, useContext } from 'react'
+import { createContext, useState, useContext, useMemo } from 'react'
 
 const MessageContext = createContext()
 
 // (1) Provider
 export const MessageProvider = ({ children }) => {
-  const [message, setMessage] = useState({ type: '', text: '' })
+  const [message, setMessage] = useState({ type: '', text: '', time: 0 })
 
-  const setErrMsg = text => setMessage({ type: 'error', text })
-  const setSucMsg = text => setMessage({ type: 'success', text })
+  const setErrMsg = text => setMessage({ type: 'error', text, time: Date.now() })
+  const setSucMsg = text => setMessage({ type: 'success', text, time: Date.now() })
 
-  const value = { message, setMessage, setErrMsg, setSucMsg }
+  const value = useMemo(() => ({ message, setMessage, setErrMsg, setSucMsg }), [message])
 
   return <MessageContext.Provider value={value}>{children}</MessageContext.Provider>
 }

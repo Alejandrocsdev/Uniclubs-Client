@@ -3,7 +3,7 @@ import S from './style.module.css'
 // Libraries
 import { useFormContext } from 'react-hook-form'
 
-function Input({ name, type = 'text', placeholder }) {
+function Input({ name, ...props }) {
   const {
     register,
     formState: { errors }
@@ -13,12 +13,7 @@ function Input({ name, type = 'text', placeholder }) {
 
   return (
     <div className={S.inputContainer}>
-      <input
-        className={S.input}
-        {...register(name, { required: `${name} is required` })}
-        type={type}
-        placeholder={placeholder}
-      />
+      <input className={S.input} {...register(name)} {...props} />
       {error && <div className={S.inputError}>{error}</div>}
     </div>
   )

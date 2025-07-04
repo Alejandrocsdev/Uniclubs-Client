@@ -1,5 +1,4 @@
-.success,
-.error {
+.message {
   height: 2.5rem;
   width: 100%;
   display: flex;
@@ -18,5 +17,4 @@
 .error {
   color: var(--error-red);
   background-color: var(--error-background);
-  z-index: 1;
 }

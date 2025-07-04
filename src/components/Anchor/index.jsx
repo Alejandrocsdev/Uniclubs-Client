@@ -1,6 +1,6 @@
 // Libraries
 import { Link } from 'react-router-dom'
-// Custom Functions
+// Utilities
 import { devErr } from '../../../utils'
 
 function Anchor({ int, ext, style, target, onClick, children }) {
