@@ -1,6 +1,10 @@
 .inputContainer {
   margin-bottom: 2rem;
   position: relative;
+
+  @media (max-width: 40rem) {
+    margin-bottom: 1.5rem;
+  }
 }
 
 .input {
@@ -10,6 +14,11 @@
   border-radius: 0.625rem;
   font-size: 1rem;
   transition: all 0.3s ease;
+
+  @media (max-width: 40rem) {
+    padding: 0.85rem;
+    font-size: 0.85rem;
+  }
 }
 
 .input:focus {
@@ -19,8 +28,28 @@
 }
 
 .inputError {
-  padding: calc((2rem - 1rem) / 2) 1rem;
+  padding: calc((2rem - 0.8rem) / 2) 1rem;
   color: var(--error-red);
   font-size: 0.8rem;
   position: absolute;
+
+  @media (max-width: 40rem) {
+    padding: calc((1.5rem - 0.7rem) / 2) 1rem;
+    font-size: 0.7rem;
+  }
+}
+
+.eyeIcon {
+  color: gray;
+  font-size: 1.125rem;
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  @media (max-width: 40rem) {
+    font-size: 1rem;
+    right: 0.85rem;
+  }
 }

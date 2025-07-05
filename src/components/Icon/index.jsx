@@ -12,9 +12,9 @@ const iconMap = {
   faEyeSlash
 }
 
-function Icon({ style, icon }) {
+function Icon({ style, icon, onClick }) {
   const selected = iconMap[icon]
-  return <FontAwesomeIcon className={style} icon={selected} />
+  return <FontAwesomeIcon className={style} icon={selected} onClick={onClick} />
 }
 
 export default Icon

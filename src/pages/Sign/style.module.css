@@ -8,20 +8,36 @@
   justify-content: center;
   align-items: center;
   position: relative;
+
+  @media (max-width: 40rem) {
+    min-height: 100dvh;
+    width: 100dvh;
+    border-radius: 0;
+  }
 }
 
 .card {
   width: 25rem;
-  padding: 2.5rem 2.5rem 0.5rem;
+  padding: 2.5rem;
   background: hsla(0, 0%, 100%, 0.9);
   border-radius: 1.25rem;
   box-shadow: 0 1.25rem 2.5rem hsla(0, 0%, 0%, 0.1);
+
+  @media (max-width: 40rem) {
+    width: 20rem;
+    padding: 1.8rem;
+  }
 }
 
 .cardTitle {
   margin-bottom: 2rem;
   font-size: 2rem;
   text-align: center;
+
+  @media (max-width: 40rem) {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .reset,
@@ -30,15 +46,18 @@
   font-size: 0.875rem;
   display: flex;
   justify-content: space-between;
+
+  @media (max-width: 40rem) {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.switch {
+  margin-bottom: 0;
 }
 
 .text {
   color: hsl(0, 0%, 20%);
-}
-
-.linkContainer {
-  width: 3.5rem;
-  text-align: center;
 }
 
 .link {
@@ -62,6 +81,11 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+
+  @media (max-width: 40rem) {
+    padding: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .submit:hover {
