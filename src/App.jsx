@@ -8,6 +8,8 @@ import { MessageProvider } from './contexts/MessageContext'
 // Layout
 import AuthLayout from './layouts/AuthLayout'
 import MainLayout from './layouts/MainLayout'
+// Routes
+import ProtectedRoutes from './routes/ProtectedRoutes'
 // Public Pages
 import Sign from './pages/Sign'
 import Reset from './pages/Reset'
@@ -19,16 +21,18 @@ function App() {
     <BrowserRouter>
       <MessageProvider>
         <Routes>
-          {/* Auth routes */}
+          {/* Public Routes */}
           <Route element={<AuthLayout />}>
             <Route path="/sign-in" element={<Sign isSignIn={true} />} />
             <Route path="/sign-up" element={<Sign isSignIn={false} />} />
             <Route path="/reset" element={<Reset />} />
           </Route>
 
-          {/* Main routes */}
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
+          {/* Private Routes */}
+          <Route element={<ProtectedRoutes />}>
+            <Route element={<MainLayout />}>
+              <Route index element={<Home />} />
+            </Route>
           </Route>
 
           {/* Catch-all fallback route */}

@@ -3,10 +3,11 @@ import S from './style.module.css'
 // Libraries
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
-import { axiosPublic } from '../../../api'
+import { axiosPrivate } from '../../api'
 import { useMessage } from '../../contexts/MessageContext'
+import useRedux from '../../hooks/useRedux'
 // Utilities
-import { devLog, devErr } from '../../../utils'
+import { devLog, devErr } from '../../utils'
 // Validations
 import { signInSchema, signUpSchema } from '../../validations'
 // Components
@@ -16,25 +17,31 @@ import Anchor from '../../components/Anchor'
 
 function Sign({ isSignIn }) {
   const { setSucMsg, setErrMsg } = useMessage()
+  const { setAuth, clearAuth } = useRedux()
   const navigate = useNavigate()
 
   const onSignIn = async formData => {
     try {
       const { username, password } = formData
-      const { data } = await axiosPublic.post('/api/auth/sign-in', { username, password })
-      devLog(data)
+      devLog('Send [Sign In] Request')
+      const { data } = await axiosPrivate.post('/api/auth/sign-in', { username, password })
+      devLog('[Sign In] Response', data)
+      setAuth({ token: data.accessToken })
       setSucMsg('Sign in successfully.')
       navigate('/')
     } catch (error) {
       devErr(error?.response?.data?.message || 'Unknown error')
       setErrMsg('Sign in failed.')
+      clearAuth()
     }
   }
 
   const onSignUp = async formData => {
     try {
       const { username, password, rePassword, email } = formData
+      devLog('Send [Sign Up] Request')
       const { data } = await axiosPublic.post('/api/auth/sign-up', { username, password, rePassword, email })
+      devLog('[Sign Up] Response', data)
       devLog(data)
       setSucMsg('Sign up successfully.')
       navigate('/sign-in')
