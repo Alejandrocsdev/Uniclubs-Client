@@ -21,7 +21,7 @@ function Input({ name, ...props }) {
   return (
     <div className={S.inputContainer}>
       <input
-        className={S.input}
+        className={`${S.input}${error ? ` ${S.invalid}` : ''}`}
         type={isPassword ? (show ? 'text' : 'password') : props.type}
         {...register(name)}
         {...props}

@@ -13,7 +13,6 @@
   border: 0.125rem solid hsl(0, 0%, 85%);
   border-radius: 0.625rem;
   font-size: 1rem;
-  transition: all 0.3s ease;
 
   @media (max-width: 40rem) {
     padding: 0.85rem;
@@ -25,6 +24,11 @@
   outline: none;
   border-color: hsl(210, 100%, 65%);
   box-shadow: 0 0 0.625rem hsla(210, 100%, 65%, 0.3);
+}
+
+.invalid,
+.invalid:focus {
+  border-color: var(--error-red);
 }
 
 .inputError {

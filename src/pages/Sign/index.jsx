@@ -1,11 +1,12 @@
 // CSS Module
 import S from './style.module.css'
 // Libraries
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
-import { axiosPrivate } from '../../api'
+import { axiosPublic, axiosPrivate } from '../../api'
 import { useMessage } from '../../contexts/MessageContext'
-import useRedux from '../../hooks/useRedux'
+import { useRedux, useUpdateEffect } from '../../hooks'
 // Utilities
 import { devLog, devErr } from '../../utils'
 // Validations
@@ -18,7 +19,12 @@ import Anchor from '../../components/Anchor'
 function Sign({ isSignIn }) {
   const { setSucMsg, setErrMsg } = useMessage()
   const { setAuth, clearAuth } = useRedux()
+  const [formExtra, setFormExtra] = useState(null)
   const navigate = useNavigate()
+
+  // Form extra methods
+  const { reset, setFocus } = formExtra || {}
+  useUpdateEffect(() => reset(), [isSignIn])
 
   const onSignIn = async formData => {
     try {
@@ -30,8 +36,13 @@ function Sign({ isSignIn }) {
       setSucMsg('Sign in successfully.')
       navigate('/')
     } catch (error) {
-      devErr(error?.response?.data?.message || 'Unknown error')
-      setErrMsg('Sign in failed.')
+      if (error.status === 429) {
+        setErrMsg('Too many sign in attempts. Please try again later.')
+      } else {
+        setErrMsg('Sign in failed.')
+      }
+      reset()
+      devErr(error?.response?.data?.message || error?.message || 'Unknown error')
       clearAuth()
     }
   }
@@ -46,8 +57,20 @@ function Sign({ isSignIn }) {
       setSucMsg('Sign up successfully.')
       navigate('/sign-in')
     } catch (error) {
+      const details = error?.response?.data?.details
+      if (error.status === 409 && details?.type === 'unique violation') {
+        const { field, value } = details
+        const fieldMsgMap = {
+          username: `Username ${value} is not available.`,
+          email: 'The email you have provided is already associated with an account.'
+        }
+        setErrMsg(fieldMsgMap[field] || 'Sign up failed.')
+        setFocus(field)
+      } else {
+        setErrMsg('Sign up failed.')
+      }
+      reset()
       devErr(error?.response?.data?.message || 'Unknown error')
-      setErrMsg('Sign up failed.')
     }
   }
 
@@ -55,7 +78,11 @@ function Sign({ isSignIn }) {
     <main className={S.main}>
       <div className={S.card}>
         <h2 className={S.cardTitle}>{isSignIn ? 'Sign In' : 'Sign Up'}</h2>
-        <Form schema={isSignIn ? signInSchema : signUpSchema} onSubmit={isSignIn ? onSignIn : onSignUp}>
+        <Form
+          extra={setFormExtra}
+          schema={isSignIn ? signInSchema : signUpSchema}
+          onSubmit={isSignIn ? onSignIn : onSignUp}
+        >
           {/* Username */}
           <Input name="username" placeholder="Please enter your username" maxLength={16} />
 
