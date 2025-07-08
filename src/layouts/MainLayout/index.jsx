@@ -8,7 +8,6 @@ import Message from '../../components/Message'
 function MainLayout() {
   return (
     <div className={S.container}>
-      <Message />
       <Outlet />
     </div>
   )

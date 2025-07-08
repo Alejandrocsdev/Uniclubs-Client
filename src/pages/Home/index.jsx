@@ -2,6 +2,8 @@
 import S from './style.module.css'
 // Custom Functions
 import useRedux from '../../hooks/useRedux'
+// Components
+import Anchor from '../../components/Anchor'
 
 function Home() {
   const { user, token } = useRedux()
@@ -12,6 +14,10 @@ function Home() {
       <div>Email: {user?.email}</div>
       <div>Token:</div>
       <div>{token}</div>
+
+      <Anchor style={S.link} int="/sign-in">
+        Sign In
+      </Anchor>
     </main>
   )
 }

@@ -18,7 +18,7 @@ import Anchor from '../../components/Anchor'
 
 function Sign({ isSignIn }) {
   const { setSucMsg, setErrMsg } = useMessage()
-  const { setAuth, clearAuth } = useRedux()
+  const { clearAuth } = useRedux()
   const [formExtra, setFormExtra] = useState(null)
   const navigate = useNavigate()
 
@@ -31,8 +31,7 @@ function Sign({ isSignIn }) {
       const { username, password } = formData
       devLog('Send [Sign In] Request')
       const { data } = await axiosPrivate.post('/api/auth/sign-in', { username, password })
-      devLog('[Sign In] Response', data)
-      setAuth({ token: data.accessToken })
+      devLog('[Sign In] Response:', data)
       setSucMsg('Sign in successfully.')
       navigate('/')
     } catch (error) {
@@ -42,7 +41,7 @@ function Sign({ isSignIn }) {
         setErrMsg('Sign in failed.')
       }
       reset()
-      devErr(error?.response?.data?.message || error?.message || 'Unknown error')
+      devErr(error.response?.data?.message || error?.message || 'Unknown error')
       clearAuth()
     }
   }
@@ -52,8 +51,7 @@ function Sign({ isSignIn }) {
       const { username, password, rePassword, email } = formData
       devLog('Send [Sign Up] Request')
       const { data } = await axiosPublic.post('/api/auth/sign-up', { username, password, rePassword, email })
-      devLog('[Sign Up] Response', data)
-      devLog(data)
+      devLog('[Sign Up] Response:', data)
       setSucMsg('Sign up successfully.')
       navigate('/sign-in')
     } catch (error) {
@@ -70,7 +68,7 @@ function Sign({ isSignIn }) {
         setErrMsg('Sign up failed.')
       }
       reset()
-      devErr(error?.response?.data?.message || 'Unknown error')
+      devErr(error.response?.data?.message || 'Unknown error')
     }
   }
 
@@ -117,6 +115,10 @@ function Sign({ isSignIn }) {
           </div>
         </Form>
       </div>
+
+      <Anchor style={S.link} int="/">
+        Home
+      </Anchor>
     </main>
   )
 }

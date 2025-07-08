@@ -35,7 +35,7 @@ axiosPrivate.interceptors.response.use(
   },
   async error => {
     const originalRequest = error.config
-    const status = error.response.status
+    const status = error.response?.status
 
     // Handle 401 Unauthorized
     if (status === 401 && !originalRequest.retry) {

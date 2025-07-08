@@ -1,0 +1,51 @@
+.error {
+  height: 100dvh;
+  background: var(--primary-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.card {
+  width: 25rem;
+  padding: 2rem;
+  background: hsl(277, 59%, 90%);
+  color: hsl(0, 0%, 10%);
+  border-radius: 1rem;
+  border: 0.2rem solid hsl(290, 80%, 40%);
+  text-align: center;
+
+}
+
+.xMark {
+  padding-bottom: 1rem;
+  font-size: 4rem;
+  color: var(--error-red);
+
+}
+
+.title {
+  font-size: 1.75rem;
+  color: var(--error-red);
+  margin-bottom: 1rem;
+}
+
+.message {
+  margin-bottom: 1rem;
+  color: var(--primary-text);
+}
+
+.button {
+  margin-top: 1rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  background: hsl(290, 80%, 40%);
+  color: white;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: hsl(290, 80%, 50%);
+}

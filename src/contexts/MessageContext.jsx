@@ -5,10 +5,10 @@ const MessageContext = createContext()
 
 // (1) Provider
 export const MessageProvider = ({ children }) => {
-  const [message, setMessage] = useState({ type: '', text: '', time: 0 })
+  const [message, setMessage] = useState({ type: '', text: '' })
 
-  const setErrMsg = text => setMessage({ type: 'error', text, time: Date.now() })
-  const setSucMsg = text => setMessage({ type: 'success', text, time: Date.now() })
+  const setErrMsg = text => setMessage({ type: 'error', text })
+  const setSucMsg = text => setMessage({ type: 'success', text })
 
   const value = useMemo(() => ({ message, setMessage, setErrMsg, setSucMsg }), [message])
 
