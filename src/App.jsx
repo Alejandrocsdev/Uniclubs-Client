@@ -34,6 +34,7 @@ function App() {
       <MessageProvider>
         {/* Global Message */}
         <Message />
+        
         <Routes>
           {/* Public Routes */}
           <Route element={<AuthLayout />}>

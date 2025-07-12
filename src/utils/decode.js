@@ -10,8 +10,7 @@ export const isTokenValid = token => {
     const { exp } = jwtDecode(token)
     return exp * 1000 > Date.now()
   } catch (error) {
-    console.log('isTokenValid:', error.message)
-    devErr(error)
+    devErr(error.message || 'Unknown error')
     return false
   }
 }

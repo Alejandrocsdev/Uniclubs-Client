@@ -2,12 +2,12 @@
 import { useLocation, Outlet, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 // Custom Functions
-import { axiosPrivate } from '../api'
+import { api, axiosPrivate } from '../api'
 import useRedux from '../hooks/useRedux'
 // Laoder
 import ScreenLoader from '../loaders/ScreenLoader'
 // Utilities
-import { isTokenValid, devLog, devErr } from '../utils'
+import { isTokenValid } from '../utils'
 
 const Protected = () => {
   const location = useLocation()
@@ -19,17 +19,16 @@ const Protected = () => {
       if (isTokenValid(token)) {
         setState('valid')
       } else {
-        try {
-          devLog('Send [Get Auth User] Request')
-          const { data } = await axiosPrivate.get('/api/auth/me')
-          devLog('[Get Auth User] Response:', data)
-          setState('valid')
-          setAuth({ user: data?.user })
-        } catch (error) {
-          devErr(error.response?.data?.message || 'Unknown error')
-          setState('invalid')
-          clearAuth()
-        }
+        await api(axiosPrivate.get('/api/auth/me'), {
+          onSuccess: data => {
+            setState('valid')
+            setAuth({ user: data?.user })
+          },
+          onError: () => {
+            setState('invalid')
+            clearAuth()
+          }
+        })
       }
     }
     routesAuth()

@@ -1,9 +1,7 @@
 // Libraries
 import { useState, useEffect } from 'react'
 // Custome Functions
-import { axiosPublic } from '../api'
-// Utilities
-import { devErr } from '../utils'
+import { api, axiosPublic } from '../api'
 
 const useLoader = () => {
   const [loading, setLoading] = useState(true)
@@ -17,14 +15,13 @@ const useLoader = () => {
     let interval = undefined
 
     const checkServer = async () => {
-      try {
-        await axiosPublic.get('/')
-        setLoading(false)
-        clearInterval(interval)
-        return
-      } catch (error) {
-        devErr(`${error?.message}: failed to connect to server`)
-      }
+      await api(axiosPublic.get('/'), {
+        onSuccess: () => {
+          setLoading(false)
+          clearInterval(interval)
+          return
+        }
+      })
 
       retryCount++
 

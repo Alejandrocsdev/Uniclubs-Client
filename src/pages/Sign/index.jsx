@@ -4,11 +4,9 @@ import S from './style.module.css'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
-import { axiosPublic, axiosPrivate } from '../../api'
+import { api, axiosPrivate } from '../../api'
 import { useMessage } from '../../contexts/MessageContext'
 import { useRedux, useUpdateEffect } from '../../hooks'
-// Utilities
-import { devLog, devErr } from '../../utils'
 // Validations
 import { signInSchema, signUpSchema } from '../../validations'
 // Components
@@ -17,9 +15,9 @@ import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
 
 function Sign({ isSignIn }) {
+  const [formExtra, setFormExtra] = useState(null)
   const { setSucMsg, setErrMsg } = useMessage()
   const { clearAuth } = useRedux()
-  const [formExtra, setFormExtra] = useState(null)
   const navigate = useNavigate()
 
   // Form extra methods
@@ -27,49 +25,44 @@ function Sign({ isSignIn }) {
   useUpdateEffect(() => reset(), [isSignIn])
 
   const onSignIn = async formData => {
-    try {
-      const { username, password } = formData
-      devLog('Send [Sign In] Request')
-      const { data } = await axiosPrivate.post('/api/auth/sign-in', { username, password })
-      devLog('[Sign In] Response:', data)
-      setSucMsg('Sign in successfully.')
-      navigate('/')
-    } catch (error) {
-      if (error.status === 429) {
-        setErrMsg('Too many sign in attempts. Please try again later.')
-      } else {
-        setErrMsg('Sign in failed.')
+    await api(axiosPrivate.post('/api/auth/sign-in', formData), {
+      onSuccess: () => {
+        setSucMsg('Sign in successfully.')
+        navigate('/')
+      },
+      onError: error => {
+        if (error.status === 429) {
+          setErrMsg('Too many sign in attempts. Please try again later.')
+        } else {
+          setErrMsg('Sign in failed.')
+        }
+        clearAuth()
+        reset()
       }
-      reset()
-      devErr(error.response?.data?.message || error?.message || 'Unknown error')
-      clearAuth()
-    }
+    })
   }
 
   const onSignUp = async formData => {
-    try {
-      const { username, password, rePassword, email } = formData
-      devLog('Send [Sign Up] Request')
-      const { data } = await axiosPublic.post('/api/auth/sign-up', { username, password, rePassword, email })
-      devLog('[Sign Up] Response:', data)
-      setSucMsg('Sign up successfully.')
-      navigate('/sign-in')
-    } catch (error) {
-      const details = error?.response?.data?.details
-      if (error.status === 409 && details?.type === 'unique violation') {
-        const { field, value } = details
-        const fieldMsgMap = {
-          username: `Username ${value} is not available.`,
-          email: 'The email you have provided is already associated with an account.'
+    await api(axiosPrivate.post('/api/auth/sign-up', formData), {
+      onSuccess: () => {
+        setSucMsg('Sign up successfully.')
+        navigate('/sign-in')
+      },
+      onError: error => {
+        const { type, field, value } = details
+        if (error.status === 409 && type === 'unique violation') {
+          const messages = {
+            username: `Username ${value} is not available.`,
+            email: 'The email you have provided is already associated with an account.'
+          }
+          setErrMsg(messages[field] || 'Sign up failed.')
+          setFocus(field)
+        } else {
+          setErrMsg('Sign up failed.')
         }
-        setErrMsg(fieldMsgMap[field] || 'Sign up failed.')
-        setFocus(field)
-      } else {
-        setErrMsg('Sign up failed.')
+        reset()
       }
-      reset()
-      devErr(error.response?.data?.message || 'Unknown error')
-    }
+    })
   }
 
   return (

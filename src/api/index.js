@@ -1,73 +1,18 @@
-// Libraries
-import axios from 'axios'
 // Custom Functions
-import { store } from '../redux/store.js'
-import { setCredentials, clearCredentials } from '../redux/authSlice.js'
+import { axiosPublic, axiosPrivate } from './axios'
 // Utilities
-import { serverUrl, devLog } from '../utils'
+import { devLog, devErr } from '../utils'
 
-// Public
-export const axiosPublic = axios.create({ baseURL: serverUrl })
-// Private
-export const axiosPrivate = axios.create({ baseURL: serverUrl, withCredentials: true })
-// Refresh Token
-const refreshToken = () => axios.post(`${serverUrl}/api/auth/refresh`, {}, { withCredentials: true })
-
-// Request Interceptor
-axiosPrivate.interceptors.request.use(
-  request => {
-    devLog('Intercepted Request:', request)
-
-    // Inject Authorization header if token exists
-    const token = store.getState().auth.token
-    if (token) request.headers['Authorization'] = `Bearer ${token}`
-
-    return request
-  },
-  error => Promise.reject(error)
-)
-
-// Response Interceptor
-axiosPrivate.interceptors.response.use(
-  response => {
-    devLog('Intercepted Response:', response)
-    return response
-  },
-  async error => {
-    const originalRequest = error.config
-    const status = error.response?.status
-
-    // Handle 401 Unauthorized
-    if (status === 401 && !originalRequest.retry) {
-      // Mark request as retried to prevent infinite loop
-      originalRequest.retry = true
-
-      try {
-        devLog('Send [Refresh Token] request')
-        const { data } = await refreshToken()
-        devLog('[Refresh Token] Response:', data)
-        const newToken = data.accessToken
-
-        // Update Redux state with new token
-        store.dispatch(setCredentials({ token: newToken }))
-
-        // Retry the original request with the new token
-        originalRequest.headers['Authorization'] = `Bearer ${newToken}`
-        return axiosPrivate(originalRequest)
-      } catch (refreshError) {
-        // Clear credentials and force sign out
-        store.dispatch(clearCredentials())
-
-        return Promise.reject(refreshError)
-      }
-    }
-
-    // Handle 403 Forbidden
-    if (status === 403) {
-      // Clear credentials and force sign out
-      store.dispatch(clearCredentials())
-    }
-
-    return Promise.reject(error)
+const api = async (request, { onSuccess, onError }) => {
+  try {
+    devLog('Sending request...')
+    const { data } = await request
+    devLog('Response:', data)
+    if (onSuccess) onSuccess(data)
+  } catch (error) {
+    devErr(error.response?.data?.message || error.message || 'Unknown error')
+    if (onError) onError(error)
   }
-)
+}
+
+export { api, axiosPublic, axiosPrivate }
