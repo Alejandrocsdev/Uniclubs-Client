@@ -11,13 +11,12 @@ function Form({ style, onSubmit, schema, extra, children }) {
     shouldFocusError: false
   })
 
+  const { reset, resetField, setFocus, formState } = methods
+  const { isSubmitting } = formState
+
   useEffect(() => {
-    extra({
-      reset: methods.reset,
-      resetField: methods.resetField,
-      setFocus: methods.setFocus
-    })
-  }, [])
+    extra({ reset, resetField, setFocus, isSubmitting })
+  }, [isSubmitting])
 
   return (
     <FormProvider {...methods}>

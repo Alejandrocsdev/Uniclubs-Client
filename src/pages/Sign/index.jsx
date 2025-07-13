@@ -1,7 +1,7 @@
 // CSS Module
 import S from './style.module.css'
 // Libraries
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
 import { api, axiosPrivate } from '../../api'
@@ -14,6 +14,7 @@ import Form from '../../components/Form'
 import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
 import OtpInput from '../../components/OtpInput'
+import Submit from '../../components/Submit'
 
 function Sign({ isSignIn }) {
   const [formExtra, setFormExtra] = useState(null)
@@ -22,7 +23,7 @@ function Sign({ isSignIn }) {
   const navigate = useNavigate()
 
   // Form extra methods
-  const { reset, resetField, setFocus } = formExtra || {}
+  const { reset, resetField, setFocus, isSubmitting } = formExtra || {}
   useUpdateEffect(() => reset(), [isSignIn])
 
   const onSignIn = async formData => {
@@ -105,7 +106,9 @@ function Sign({ isSignIn }) {
           )}
 
           {/* Submit */}
-          <button className={S.submit}>{isSignIn ? 'Sign In' : 'Sign Up'}</button>
+          <Submit style={S.submit} size={10} isSubmitting={isSubmitting}>
+            {isSignIn ? 'Sign In' : 'Sign Up'}
+          </Submit>
 
           {/* Switch */}
           <div className={S.switch}>
@@ -116,10 +119,6 @@ function Sign({ isSignIn }) {
           </div>
         </Form>
       </div>
-
-      <Anchor style={S.link} int="/">
-        Home
-      </Anchor>
     </main>
   )
 }
