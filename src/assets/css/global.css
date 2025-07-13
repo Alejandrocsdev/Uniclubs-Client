@@ -5,6 +5,7 @@
   padding: 0;
   border: 0;
   background: none;
+  user-select: none;
   box-sizing: border-box;
 }
 
@@ -32,4 +33,5 @@ a {
   --success-background: hsl(140, 100%, 85%);
   --error-red: hsl(355, 100%, 65%);
   --error-background: hsl(350, 100%, 95%);
+  --input-margin-bottom: 2rem;
 }

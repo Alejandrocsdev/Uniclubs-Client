@@ -34,13 +34,13 @@ axiosPrivate.interceptors.response.use(
     return response
   },
   async error => {
-    devErr(error.response?.data?.message || error.message || 'Unknown error')
-    
     const originalRequest = error.config
     const status = error.response?.status
 
     // Handle 401 Unauthorized
     if (status === 401 && !originalRequest.retry) {
+      devErr(error.response?.data?.message || error.message || 'Unknown error')
+
       // Mark request as retried to prevent infinite loop
       originalRequest.retry = true
 
@@ -68,6 +68,8 @@ axiosPrivate.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (status === 403) {
+      devErr(error.response?.data?.message || error.message || 'Unknown error')
+
       // Clear credentials and force sign out
       store.dispatch(clearCredentials())
     }

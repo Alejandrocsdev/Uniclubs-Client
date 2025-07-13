@@ -4,12 +4,14 @@ import S from './style.module.css'
 import { useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 // Components
-import Icon from '../Icon'
+import EmailAddon from './addons/EmailAddon'
+import PasswordAddon from './addons/PasswordAddon'
 
 function Input({ name, ...props }) {
   const [show, setShow] = useState(false)
-  const togglePassword = () => setShow(!show)
+
   const isPassword = name === 'password' || name === 'rePassword'
+  const isEmail = name === 'email'
 
   const {
     register,
@@ -18,11 +20,18 @@ function Input({ name, ...props }) {
 
   const error = errors[name]?.message
 
+  const onInput = event => {
+    if (name === 'username' || name === 'email') {
+      event.target.value = event.target.value.toLowerCase()
+    }
+  }
+
   return (
     <div className={S.inputContainer}>
       <input
-        className={`${S.input}${error ? ` ${S.invalid}` : ''}`}
+        className={`${S.input} ${isEmail ? S.email : ''} ${error ? S.invalid : ''}`}
         type={isPassword ? (show ? 'text' : 'password') : props.type}
+        onInput={onInput}
         {...register(name)}
         {...props}
       />
@@ -30,8 +39,11 @@ function Input({ name, ...props }) {
       {/* Input Error */}
       {error && <div className={S.inputError}>{error}</div>}
 
-      {/* Toggle Password Visibility */}
-      {isPassword && <Icon style={S.eyeIcon} icon={show ? 'faEye' : 'faEyeSlash'} onClick={togglePassword} />}
+      {/* Password Add-On: Toggles visibility */}
+      {isPassword && <PasswordAddon show={show} setShow={setShow} />}
+
+      {/* Email Add-On: Sends OTP */}
+      {isEmail && <EmailAddon />}
     </div>
   )
 }

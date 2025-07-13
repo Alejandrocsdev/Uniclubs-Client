@@ -1,0 +1,47 @@
+.inputContainer {
+  margin-bottom: var(--input-margin-bottom);
+  position: relative;
+
+  @media (max-width: 40rem) {
+    margin-bottom: calc(var(--input-margin-bottom) - 0.5rem)
+  }
+}
+
+.otpContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between
+}
+
+.otpInput {
+  width: 2.5rem;
+  height: 3rem;
+  font-size: 1.5625rem;
+  text-align: center;
+  border-radius: 0.3125rem;
+  border: none;
+  background: rgb(196, 196, 196);
+
+  @media (max-width: 40.625rem) {
+    width: 2.1875rem;
+    height: 3.125rem;
+    font-size: 1.25rem;
+  }
+}
+
+.otpInput:focus {
+  outline: 0.1875rem solid hsl(210, 100%, 55%);
+  outline-offset: 0.125rem;
+}
+
+.inputError {
+  padding: calc((2rem - 0.8rem) / 2) 1rem;
+  color: var(--error-red);
+  font-size: 0.8rem;
+  position: absolute;
+
+  @media (max-width: 40rem) {
+    padding: calc((1.5rem - 0.7rem) / 2) 1rem;
+    font-size: 0.7rem;
+  }
+}

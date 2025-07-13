@@ -13,6 +13,7 @@ import { signInSchema, signUpSchema } from '../../validations'
 import Form from '../../components/Form'
 import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
+import OtpInput from '../../components/OtpInput'
 
 function Sign({ isSignIn }) {
   const [formExtra, setFormExtra] = useState(null)
@@ -21,7 +22,7 @@ function Sign({ isSignIn }) {
   const navigate = useNavigate()
 
   // Form extra methods
-  const { reset, setFocus } = formExtra || {}
+  const { reset, resetField, setFocus } = formExtra || {}
   useUpdateEffect(() => reset(), [isSignIn])
 
   const onSignIn = async formData => {
@@ -49,18 +50,22 @@ function Sign({ isSignIn }) {
         navigate('/sign-in')
       },
       onError: error => {
-        const { type, field, value } = details
+        const { type, field, value } = error.response?.data?.details || {}
         if (error.status === 409 && type === 'unique violation') {
           const messages = {
             username: `Username ${value} is not available.`,
             email: 'The email you have provided is already associated with an account.'
           }
           setErrMsg(messages[field] || 'Sign up failed.')
+          resetField(field)
           setFocus(field)
+        } else if (error.status === 400 && type === 'otp failure') {
+          setErrMsg('OTP verification failed or expired.' || 'Sign up failed.')
+          resetField('otp')
         } else {
           setErrMsg('Sign up failed.')
+          reset()
         }
-        reset()
       }
     })
   }
@@ -85,6 +90,9 @@ function Sign({ isSignIn }) {
 
           {/* Email */}
           {!isSignIn && <Input name="email" placeholder="Please enter your email" maxLength={254} />}
+
+          {/* OTP */}
+          {!isSignIn && <OtpInput name="otp" />}
 
           {/* Reset Password */}
           {isSignIn && (

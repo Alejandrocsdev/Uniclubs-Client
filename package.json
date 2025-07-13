@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "wifi": "cross-env VITE_WIFI=true vite",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.2",
+    "cross-env": "^7.0.3",
     "vite": "^7.0.0"
   }
 }

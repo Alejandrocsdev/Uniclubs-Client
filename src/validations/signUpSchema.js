@@ -41,7 +41,12 @@ const signUpSchema = Joi.object({
       'any.required': 'Email is required',
       'string.empty': 'Email is required',
       'string.email': 'Email must be valid'
-    })
+    }),
+  otp: Joi.string().length(6).required().messages({
+    'any.required': 'OTP is required',
+    'string.empty': 'OTP is required',
+    'string.length': 'OTP must be exactly 6 digits'
+  })
 })
 
 export default signUpSchema

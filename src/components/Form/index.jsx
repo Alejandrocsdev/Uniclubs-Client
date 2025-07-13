@@ -14,6 +14,7 @@ function Form({ style, onSubmit, schema, extra, children }) {
   useEffect(() => {
     extra({
       reset: methods.reset,
+      resetField: methods.resetField,
       setFocus: methods.setFocus
     })
   }, [])
