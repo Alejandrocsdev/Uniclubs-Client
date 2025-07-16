@@ -30,8 +30,12 @@ function EmailAddon() {
     setIsSubmitting(true)
 
     await api(axiosPublic.post('/api/auth/email/otp', { email }), {
-      onSuccess: () => setSucMsg('OTP sent successfully.'),
-      onError: () => setErrMsg('Something went wrong. Please try again.'),
+      onSuccess: () => {
+        setSucMsg('OTP sent successfully.')
+      },
+      onError: () => {
+        setErrMsg('Something went wrong. Please try again.')
+      },
       onFinally: () => {
         setIsSubmitting(false)
         startCountdown()

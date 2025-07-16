@@ -1,7 +1,7 @@
 // CSS Module
 import S from './style.module.css'
 // Libraries
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 // Custom Functions
 import { api, axiosPrivate } from '../../api'
@@ -81,18 +81,19 @@ function Sign({ isSignIn }) {
           onSubmit={isSignIn ? onSignIn : onSignUp}
         >
           {/* Username */}
-          <Input name="username" placeholder="Please enter your username" maxLength={16} />
+          <Input name="username" placeholder="Username" maxLength={16} />
 
           {/* Password */}
-          <Input name="password" placeholder="Please enter your password" maxLength={16} />
+          <Input name="password" placeholder="Password" maxLength={16} />
 
           {/* Confirm Password */}
-          {!isSignIn && <Input name="rePassword" placeholder="Please confirm your password" maxLength={16} />}
+          {!isSignIn && <Input name="rePassword" placeholder="Repeat password" maxLength={16} />}
 
           {/* Email */}
-          {!isSignIn && <Input name="email" placeholder="Please enter your email" maxLength={254} />}
+          {!isSignIn && <Input name="email" placeholder="Email" maxLength={254} />}
 
           {/* OTP */}
+          {/* {!isSignIn && <OtpInput name="otp" />} */}
           {!isSignIn && <OtpInput name="otp" />}
 
           {/* Reset Password */}

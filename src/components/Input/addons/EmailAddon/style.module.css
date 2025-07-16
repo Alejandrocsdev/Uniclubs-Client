@@ -11,6 +11,12 @@
   right: 1rem;
   transform: translateY(-50%);
   cursor: pointer;
+
+  @media (max-width: 40rem) {
+    width: 5.125rem;
+    font-size: 0.7rem;
+    right: 0.5rem;
+  }
 }
 
 .sendOtp:hover {
