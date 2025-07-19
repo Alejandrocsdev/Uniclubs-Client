@@ -1,10 +1,12 @@
+// CSS Module
+import S from './style.module.css'
 // Components
 import InlineLoader from '../../loaders/InlineLoader'
 
-const Submit = ({ style, size, isSubmitting, children, ...props }) => {
+const Submit = ({ style, loaderSize, isSubmitting, children, ...props }) => {
   return (
-    <button className={style} disabled={isSubmitting} {...props}>
-      {isSubmitting ? <InlineLoader size={size} /> : children}
+    <button className={style || S.submit} disabled={isSubmitting} {...props}>
+      {isSubmitting ? <InlineLoader size={loaderSize} /> : children}
     </button>
   )
 }

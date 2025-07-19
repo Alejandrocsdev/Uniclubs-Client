@@ -2,7 +2,7 @@
 import S from './style.module.css'
 // Libraries
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 // Custom Functions
 import { api, axiosPrivate } from '../../api'
 import { useMessage } from '../../contexts/MessageContext'
@@ -10,17 +10,21 @@ import { useRedux, useUpdateEffect } from '../../hooks'
 // Validations
 import { signInSchema, signUpSchema } from '../../validations'
 // Components
+import Card from '../../components/Card'
 import Form from '../../components/Form'
 import Input from '../../components/Input'
 import Anchor from '../../components/Anchor'
 import OtpInput from '../../components/OtpInput'
 import Submit from '../../components/Submit'
 
-function Sign({ isSignIn }) {
+function Sign() {
   const [formExtra, setFormExtra] = useState(null)
   const { setSucMsg, setErrMsg } = useMessage()
   const { clearAuth } = useRedux()
+  const { pathname } = useLocation()
   const navigate = useNavigate()
+
+  const isSignIn = pathname === '/sign-in'
 
   // Form extra methods
   const { reset, resetField, setFocus, isSubmitting } = formExtra || {}
@@ -72,55 +76,48 @@ function Sign({ isSignIn }) {
   }
 
   return (
-    <main className={S.main}>
-      <div className={S.card}>
-        <h2 className={S.cardTitle}>{isSignIn ? 'Sign In' : 'Sign Up'}</h2>
-        <Form
-          extra={setFormExtra}
-          schema={isSignIn ? signInSchema : signUpSchema}
-          onSubmit={isSignIn ? onSignIn : onSignUp}
-        >
-          {/* Username */}
-          <Input name="username" placeholder="Username" maxLength={16} />
+    <Card title={isSignIn ? 'Sign In' : 'Sign Up'}>
+      <Form
+        extra={setFormExtra}
+        schema={isSignIn ? signInSchema : signUpSchema}
+        onSubmit={isSignIn ? onSignIn : onSignUp}
+      >
+        {/* Username */}
+        <Input name="username" placeholder="Username" maxLength={16} />
 
-          {/* Password */}
-          <Input name="password" placeholder="Password" maxLength={16} />
+        {/* Password */}
+        <Input name="password" placeholder="Password" maxLength={16} />
 
-          {/* Confirm Password */}
-          {!isSignIn && <Input name="rePassword" placeholder="Repeat password" maxLength={16} />}
+        {/* Confirm Password */}
+        {!isSignIn && <Input name="rePassword" placeholder="Repeat password" maxLength={16} />}
 
-          {/* Email */}
-          {!isSignIn && <Input name="email" placeholder="Email" maxLength={254} />}
+        {/* Email */}
+        {!isSignIn && <Input name="email" placeholder="Email" maxLength={254} />}
 
-          {/* OTP */}
-          {/* {!isSignIn && <OtpInput name="otp" />} */}
-          {!isSignIn && <OtpInput name="otp" />}
+        {/* OTP */}
+        {!isSignIn && <OtpInput name="otp" />}
 
-          {/* Reset Password */}
-          {isSignIn && (
-            <div className={S.reset}>
-              <span className={S.text}>Forgot password?</span>
-              <Anchor style={S.link} int="/reset">
-                Reset
-              </Anchor>
-            </div>
-          )}
+        {/* Reset Password */}
+        {isSignIn && (
+          <Anchor style={S.recoverLink} int="/recovery/password">
+            Forgot password?
+          </Anchor>
+        )}
 
-          {/* Submit */}
-          <Submit style={S.submit} size={10} isSubmitting={isSubmitting}>
-            {isSignIn ? 'Sign In' : 'Sign Up'}
-          </Submit>
+        {/* Submit */}
+        <Submit loaderSize={10} isSubmitting={isSubmitting}>
+          {isSignIn ? 'Sign In' : 'Sign Up'}
+        </Submit>
 
-          {/* Switch */}
-          <div className={S.switch}>
-            <span className={S.text}>{isSignIn ? 'New to Uniclubs?' : 'Already have an account?'}</span>
-            <Anchor style={S.link} int={isSignIn ? '/sign-up' : '/sign-in'}>
-              {isSignIn ? 'Sign Up' : 'Sign In'}
-            </Anchor>
-          </div>
-        </Form>
-      </div>
-    </main>
+        {/* Switch */}
+        <div className={S.switch}>
+          <span className={S.switchText}>{isSignIn ? 'New to Uniclubs?' : 'Already have an account?'}</span>
+          <Anchor style={S.switchLink} int={isSignIn ? '/sign-up' : '/sign-in'}>
+            {isSignIn ? 'Sign Up' : 'Sign In'}
+          </Anchor>
+        </div>
+      </Form>
+    </Card>
   )
 }
 

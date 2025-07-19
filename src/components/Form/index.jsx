@@ -15,7 +15,9 @@ function Form({ style, onSubmit, schema, extra, children }) {
   const { isSubmitting } = formState
 
   useEffect(() => {
-    extra({ reset, resetField, setFocus, isSubmitting })
+    if (typeof extra === 'function') {
+      extra({ reset, resetField, setFocus, isSubmitting })
+    }
   }, [isSubmitting])
 
   return (

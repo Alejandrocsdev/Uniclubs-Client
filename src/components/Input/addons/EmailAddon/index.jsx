@@ -52,7 +52,7 @@ function EmailAddon() {
   return (
     <Submit
       type="button"
-      size={6}
+      loaderSize={6}
       isSubmitting={isSubmitting}
       style={`${S.sendOtp} ${isDisabled ? S.disabled : ''}`}
       onClick={OnEmailOtp}

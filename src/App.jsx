@@ -18,7 +18,7 @@ import ScreenLoader from './loaders/ScreenLoader'
 import Protected from './routes/Protected'
 // Public Pages
 import Sign from './pages/Sign'
-import Reset from './pages/Reset'
+import Recovery from './pages/Recovery'
 // Private Pages
 import Home from './pages/Home'
 
@@ -27,20 +27,21 @@ function App() {
 
   if (loading) return <ScreenLoader />
 
-  if (error) return <Error />
+  if (error) return <Error full />
 
   return (
     <BrowserRouter>
       <MessageProvider>
         {/* Global Message */}
         <Message />
-        
+
         <Routes>
           {/* Public Routes */}
           <Route element={<AuthLayout />}>
-            <Route path="/sign-in" element={<Sign isSignIn={true} />} />
-            <Route path="/sign-up" element={<Sign isSignIn={false} />} />
-            <Route path="/reset" element={<Reset />} />
+            <Route path="/sign-in" element={<Sign />} />
+            <Route path="/sign-up" element={<Sign />} />
+            <Route path="/recovery/password" element={<Recovery />} />
+            <Route path="/recovery/username" element={<Recovery />} />
           </Route>
 
           {/* Private Routes */}

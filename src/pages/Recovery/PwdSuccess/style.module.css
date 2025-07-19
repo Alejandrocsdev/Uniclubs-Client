@@ -1,0 +1,15 @@
+.check {
+  padding-bottom: 1rem;
+  font-size: 4rem;
+  color: var(--success-green);
+}
+
+.title {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.message {
+  line-height: 1.5;
+  color: var(--primary-text);
+}
