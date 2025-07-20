@@ -8,15 +8,12 @@ import useRedux from '../../hooks/useRedux'
 function Home() {
   const { user } = useRedux()
 
-  useEffect(() => {
-    fetch('/api/edge')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch')
-        return res.json()
-      })
-      .then(console.log)
-      .catch(console.error)
-  }, [])
+useEffect(() => {
+  fetch('/api/edge')
+    .then(res => res.json())
+    .then(console.log)
+    .catch(console.error)
+}, [])
   return (
     <main className={S.main}>
       <div>This is Home page.</div>
