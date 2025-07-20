@@ -45,7 +45,7 @@ function App() {
           </Route>
 
           {/* Private Routes */}
-          <Route element={<Protected />}>
+          <Route element={<Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />}>
             <Route element={<MainLayout />}>
               <Route index element={<Home />} />
             </Route>

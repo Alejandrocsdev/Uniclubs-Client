@@ -1,14 +1,15 @@
 // CSS Module
 import S from './style.module.css'
 // Libraries
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 
 const OtpInput = ({ length = 6, name }) => {
-  const inputRef = useRef(null)
+  // const inputRef = useRef(null)
   const [isFocused, setIsFocused] = useState(false)
 
   const {
+    register,
     setValue,
     formState: { errors }
   } = useFormContext()
@@ -17,7 +18,6 @@ const OtpInput = ({ length = 6, name }) => {
   const error = errors[name]?.message
 
   const sanitizeOtp = str => str.replace(/\D/g, '').slice(0, length)
-
   const setValueConfig = { shouldValidate: true, shouldDirty: true }
 
   const handleChange = event => {
@@ -49,7 +49,7 @@ const OtpInput = ({ length = 6, name }) => {
 
       {/* Single hidden but focused input */}
       <input
-        ref={inputRef}
+        {...register(name)}
         type="text"
         name={name}
         inputMode="numeric"

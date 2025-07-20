@@ -14,3 +14,21 @@ export const isTokenValid = token => {
     return false
   }
 }
+
+export const isAllowed = (source, allowedRoles) => {
+  try {
+    let roles
+    if (typeof source === 'string') {
+      roles = jwtDecode(source).roles
+    } else if (Array.isArray(source)) {
+      roles = source
+    } else {
+      roles = []
+    }
+
+    return roles?.some(role => allowedRoles.includes(role))
+  } catch (error) {
+    devErr(error.message || 'Unknown error')
+    return false
+  }
+}

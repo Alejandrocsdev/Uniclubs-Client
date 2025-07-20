@@ -65,8 +65,9 @@ function Sign() {
           resetField(field)
           setFocus(field)
         } else if (error.status === 400 && type === 'otp failure') {
-          setErrMsg('OTP verification failed or expired.' || 'Sign up failed.')
+          setErrMsg('OTP verification failed or expired.')
           resetField('otp')
+          setFocus('otp')
         } else {
           setErrMsg('Sign up failed.')
           reset()

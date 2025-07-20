@@ -29,7 +29,7 @@ function Recovery() {
   const isPassword = target === 'password'
 
   // Form extra methods
-  const { reset, isSubmitting } = formExtra || {}
+  const { reset, resetField, setFocus, isSubmitting } = formExtra || {}
   useUpdateEffect(() => reset(), [isPassword])
 
   const onReset = async formData => {
@@ -38,10 +38,17 @@ function Recovery() {
         setSucMsg('Password updated successfully.')
         setShowSuccess(true)
       },
-      onError: () => {
-        setErrMsg('Failed to reset password.')
+      onError: error => {
+        const { type } = error.response?.data?.details || {}
+        if (error.status === 400 && type === 'otp failure') {
+          setErrMsg('OTP verification failed or expired.')
+          resetField('otp')
+          setFocus('otp')
+        } else {
+          setErrMsg('Failed to reset password.')
+          reset()
+        }
         setShowSuccess(false)
-        reset()
       }
     })
   }
@@ -52,10 +59,17 @@ function Recovery() {
         setSucMsg('Username sent successfully.')
         setShowSuccess(true)
       },
-      onError: () => {
-        setErrMsg('Failed to send username email.')
+      onError: error => {
+        const { type } = error.response?.data?.details || {}
+        if (error.status === 400 && type === 'otp failure') {
+          setErrMsg('OTP verification failed or expired.')
+          resetField('otp')
+          setFocus('otp')
+        } else {
+          setErrMsg('Failed to send username email.')
+          reset()
+        }
         setShowSuccess(false)
-        reset()
       }
     })
   }

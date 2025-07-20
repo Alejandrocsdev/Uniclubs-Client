@@ -1,5 +1,5 @@
 import { serverUrl } from './url'
-import { isTokenValid } from './decode'
+import { isTokenValid, isAllowed } from './decode'
 import { devLog, devErr } from './debug'
 
-export { serverUrl, isTokenValid, devLog, devErr }
+export { serverUrl, isTokenValid, isAllowed, devLog, devErr }
