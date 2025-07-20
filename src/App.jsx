@@ -23,7 +23,7 @@ import Recovery from './pages/Recovery'
 // Private Pages
 import Home from './pages/Home'
 // Envieonment Variables
-const { MODE } = import.meta.env
+// const { MODE } = import.meta.env
 
 function App() {
   const { loading, error } = useLoader()
@@ -32,14 +32,20 @@ function App() {
 
   if (error) return <Error full />
 
-  useEffect(() => {
-    if (MODE === 'production') {
-      fetch('/api/edge')
-        .then(res => res.json())
-        .then(data => console.log('Client IP info from Vercel:', data))
-        .catch(console.error)
-    }
-  }, [])
+useEffect(() => {
+  if (import.meta.env.MODE === 'production') {
+    fetch('/api/edge')
+      .then(async res => {
+        const contentType = res.headers.get('Content-Type')
+        if (!res.ok || !contentType?.includes('application/json')) {
+          throw new Error('Unexpected response format')
+        }
+        return res.json()
+      })
+      .then(data => console.log('Client IP info from Vercel:', data))
+      .catch(console.error)
+  }
+}, [])
 
   return (
     <BrowserRouter>
