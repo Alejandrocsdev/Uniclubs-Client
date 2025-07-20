@@ -13,7 +13,7 @@ function Message() {
     if (!message.text) return
 
     // Start new timeout
-    const timer = setTimeout(() => setMessage({ type: '', text: '' }), 3000)
+    const timer = setTimeout(() => setMessage({ type: '', text: '' }), 5000)
 
     // Cleanup
     return () => clearTimeout(timer)

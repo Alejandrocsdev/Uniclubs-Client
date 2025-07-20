@@ -58,7 +58,7 @@ function Sign() {
         const { type, field, value } = error.response?.data?.details || {}
         if (error.status === 409 && type === 'unique violation') {
           const messages = {
-            username: `Username ${value} is not available.`,
+            username: `Username "${value}" is not available.`,
             email: 'The email you have provided is already associated with an account.'
           }
           setErrMsg(messages[field] || 'Sign up failed.')

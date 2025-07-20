@@ -2,6 +2,7 @@
 import S from './style.module.css'
 // Libraries
 import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 // Custom Functions
 import { useCountDown } from '../../../../hooks'
@@ -13,9 +14,17 @@ import Submit from '../../../Submit'
 function EmailAddon() {
   const { count, isCounting, startCountdown } = useCountDown(60)
   const { setSucMsg, setErrMsg } = useMessage()
+  const { pathname } = useLocation()
   const {
     formState: { errors }
   } = useFormContext()
+
+  const getPurpose = () => {
+    if (pathname === '/sign-up') return 'sign-up'
+    if (pathname === '/recovery/password') return 'pwd-reset'
+    if (pathname === '/recovery/username') return 'usr-recover'
+    return ''
+  }
 
   const email = useWatch({ name: 'email' })
   const hasError = !!errors.email
@@ -24,12 +33,12 @@ function EmailAddon() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const OnEmailOtp = async () => {
+  const onEmailOtp = async () => {
     if (isDisabled || isSubmitting) return
 
     setIsSubmitting(true)
 
-    await api(axiosPublic.post('/api/auth/email/otp', { email }), {
+    await api(axiosPublic.post('/api/auth/email/otp', { email, purpose: getPurpose() }), {
       onSuccess: () => {
         setSucMsg('OTP sent successfully.')
       },
@@ -55,7 +64,7 @@ function EmailAddon() {
       loaderSize={6}
       isSubmitting={isSubmitting}
       style={`${S.sendOtp} ${isDisabled ? S.disabled : ''}`}
-      onClick={OnEmailOtp}
+      onClick={onEmailOtp}
     >
       {getButtonText()}
     </Submit>
