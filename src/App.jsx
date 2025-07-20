@@ -2,6 +2,7 @@
 import './assets/css/font.css'
 import './assets/css/global.css'
 // Libraries
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 // Custom Functions
 import { MessageProvider } from './contexts/MessageContext'
@@ -21,6 +22,8 @@ import Sign from './pages/Sign'
 import Recovery from './pages/Recovery'
 // Private Pages
 import Home from './pages/Home'
+// Envieonment Variables
+const { MODE } = import.meta.env
 
 function App() {
   const { loading, error } = useLoader()
@@ -28,6 +31,15 @@ function App() {
   if (loading) return <ScreenLoader />
 
   if (error) return <Error full />
+
+  useEffect(() => {
+    if (MODE === 'production') {
+      fetch('/api/edge')
+        .then(res => res.json())
+        .then(data => console.log('Client IP info from Vercel:', data))
+        .catch(console.error)
+    }
+  }, [])
 
   return (
     <BrowserRouter>
