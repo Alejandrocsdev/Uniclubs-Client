@@ -3,13 +3,16 @@ import S from './style.module.css'
 // Libraries
 import { Outlet } from 'react-router-dom'
 // Components
-import Message from '../../components/Message'
+import Header from './Header'
 
 function MainLayout() {
   return (
-    <div className={S.container}>
-      <Outlet />
-    </div>
+    <>
+      <Header />
+      <div className={S.container}>
+        <Outlet />
+      </div>
+    </>
   )
 }
 
