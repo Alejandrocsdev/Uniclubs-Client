@@ -5,11 +5,5 @@
       "source": "/(.*)",
       "destination": "/"
     }
-  ],
-  "git": {
-    "deploymentEnabled": {
-      "main": false,
-      "dev": false
-    }
-  }
+  ]
 }
