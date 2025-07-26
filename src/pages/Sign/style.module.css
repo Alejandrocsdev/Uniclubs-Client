@@ -1,0 +1,48 @@
+.recoverLink {
+  margin-bottom: var(--input-margin-bottom);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: hsl(210, 100%, 45%);
+  text-align: left;
+  display: block;
+  cursor: pointer;
+
+  @media (max-width: 40rem) {
+    margin-bottom: calc(var(--input-margin-bottom) - 0.5rem);
+    font-size: 0.7rem;
+  }
+}
+
+.recoverLink:hover {
+  color: hsl(210, 100%, 65%);
+}
+
+.switch {
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  display: flex;
+  justify-content: space-between;
+
+  @media (max-width: 40rem) {
+    margin-bottom: 1.5rem;
+    font-size: 0.7rem;
+  }
+}
+
+.switch {
+  margin-bottom: 0;
+}
+
+.switchText {
+  color: hsl(0, 0%, 20%);
+}
+
+.switchLink {
+  color: hsl(210, 100%, 45%);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.switchLink:hover {
+  color: hsl(210, 100%, 65%);
+}

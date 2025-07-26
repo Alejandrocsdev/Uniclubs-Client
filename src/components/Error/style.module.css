@@ -1,0 +1,54 @@
+.background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.full {
+  height: 100dvh;
+  background: var(--primary-background);
+}
+
+.xMark {
+  padding-bottom: 1rem;
+  font-size: 4rem;
+  color: var(--error-red);
+}
+
+.title {
+  font-size: 1.75rem;
+  color: var(--error-red);
+  margin-bottom: 1rem;
+}
+
+.message {
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  color: var(--primary-text);
+}
+
+.button {
+  width: 100%;
+  height: 3.3125rem;
+  padding: 1rem;
+  background-color: hsl(290, 80%, 60%);
+  color: hsl(0, 0%, 100%);
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  @media (max-width: 40rem) {
+    padding: 0.85rem;
+  }
+}
+
+.button:hover {
+  background-color: hsl(290, 80%, 50%);
+}
+
+.button:active {
+  background-color: hsl(290, 80%, 40%);
+}

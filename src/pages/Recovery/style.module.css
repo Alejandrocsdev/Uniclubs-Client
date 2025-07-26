@@ -1,0 +1,16 @@
+.switch {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: hsl(210, 100%, 45%);
+  text-align: left;
+  display: block;
+  cursor: pointer;
+
+  @media (max-width: 40rem) {
+    font-size: 0.7rem;
+  }
+}
+
+.switch:hover {
+  color: hsl(210, 100%, 65%);
+}

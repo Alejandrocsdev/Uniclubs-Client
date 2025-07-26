@@ -1,0 +1,59 @@
+.background {
+  min-height: calc(100dvh - 2.5rem * 2);
+  width: calc(100dvw - 2.5rem * 2);
+  background-color: hsla(0, 0%, 100%, 0.7);
+  border-radius: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
+  @media (max-width: 40rem) {
+    min-height: 100dvh;
+    width: 100dvh;
+    border-radius: 0;
+  }
+}
+
+.card {
+  width: 25rem;
+  padding: 2.5rem;
+  background: hsla(0, 0%, 100%, 0.9);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.25rem 2.5rem hsla(0, 0%, 0%, 0.1);
+  text-align: center;
+  position: relative;
+
+  @media (max-width: 40rem) {
+    width: 20rem;
+    padding: 1.8rem;
+  }
+}
+
+.previous {
+  font-size: 1.8rem;
+  position: absolute;
+  left: 1.6rem;
+  cursor: pointer;
+
+  @media (max-width: 40rem) {
+    font-size: 1.4rem;
+    left: 1.1rem;
+  }
+}
+
+.previous:hover {
+  color: hsl(210, 100%, 45%);
+}
+
+.cardTitle {
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  text-align: center;
+
+  @media (max-width: 40rem) {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+}

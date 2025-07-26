@@ -1,0 +1,14 @@
+.eyeIcon {
+  color: gray;
+  font-size: 1.125rem;
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+
+  @media (max-width: 40rem) {
+    font-size: 1rem;
+    right: 0.85rem;
+  }
+}

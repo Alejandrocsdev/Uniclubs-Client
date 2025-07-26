@@ -1,0 +1,13 @@
+.main {
+  text-align: center;
+}
+
+.link {
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: hsl(210, 100%, 65%);
+}
