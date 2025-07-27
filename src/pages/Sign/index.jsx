@@ -55,8 +55,8 @@ function Sign() {
         navigate('/sign-in')
       },
       onError: error => {
-        const { errCode, field, value } = error.response?.data?.details || {}
-        if (error.status === 409 && errCode === 'ER_DUP_ENTRY') {
+        const { type, field, value } = error.response?.data?.details || {}
+        if (error.status === 409 && type === 'unique violation') {
           const messages = {
             username: `Username "${value}" is not available.`,
             email: 'The email you have provided is already associated with an account.'

@@ -21,6 +21,8 @@ import Sign from './pages/Sign'
 import Recovery from './pages/Recovery'
 // Private Pages
 import Home from './pages/Home'
+import Booking from './pages/Booking'
+import Components from './pages/Components'
 
 function App() {
   const { loading, error } = useLoader()
@@ -39,15 +41,15 @@ function App() {
           {/* Public Routes */}
           <Route element={<AuthLayout />}>
             <Route path="/sign-in" element={<Sign />} />
-            <Route path="/sign-up" element={<Sign />} />
             <Route path="/recovery/password" element={<Recovery />} />
-            <Route path="/recovery/username" element={<Recovery />} />
           </Route>
 
           {/* Private Routes */}
           <Route element={<Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />}>
             <Route element={<MainLayout />}>
               <Route index element={<Home />} />
+              <Route path="/booking" element={<Booking />} />
+              <Route path="/components" element={<Components />} />
             </Route>
           </Route>
 

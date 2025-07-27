@@ -21,8 +21,8 @@ function EmailAddon() {
 
   const getPurpose = () => {
     if (pathname === '/sign-up') return 'sign-up'
-    if (pathname === '/recovery/password') return 'reset-password'
-    if (pathname === '/recovery/username') return 'recover-username'
+    if (pathname === '/recovery/password') return 'pwd-reset'
+    if (pathname === '/recovery/username') return 'usr-recover'
     return ''
   }
 
@@ -38,7 +38,7 @@ function EmailAddon() {
 
     setIsSubmitting(true)
 
-    await api(axiosPublic.post('/api/auth/email-otp', { email, purpose: getPurpose() }), {
+    await api(axiosPublic.post('/api/auth/email/otp', { email, purpose: getPurpose() }), {
       onSuccess: () => {
         setSucMsg('OTP sent successfully.')
       },
