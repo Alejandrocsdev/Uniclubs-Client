@@ -33,7 +33,7 @@ function Recovery() {
   useUpdateEffect(() => reset(), [isPassword])
 
   const onReset = async formData => {
-    await api(axiosPublic.post('/api/recovery/password', formData), {
+    await api(axiosPublic.post('/api/auth/reset-password', formData), {
       onSuccess: () => {
         setSucMsg('Password updated successfully.')
         setShowSuccess(true)
@@ -54,7 +54,7 @@ function Recovery() {
   }
 
   const onRecover = async formData => {
-    await api(axiosPublic.post('/api/recovery/username', formData), {
+    await api(axiosPublic.post('/api/auth/recover-username', formData), {
       onSuccess: () => {
         setSucMsg('Username sent successfully.')
         setShowSuccess(true)
