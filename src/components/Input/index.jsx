@@ -10,7 +10,7 @@ import PasswordAddon from './addons/PasswordAddon'
 function Input({ name, ...props }) {
   const [show, setShow] = useState(false)
 
-  const isPassword = name === 'password' || name === 'rePassword' || name === 'newPassword'
+  const isPassword = name === 'password' || name === 'rePassword'
   const isEmail = name === 'email'
 
   const {
