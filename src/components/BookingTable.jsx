@@ -204,6 +204,7 @@ const BookingTable = ({
   const [newRoomName, setNewRoomName] = useState('');
   const [newRoomCapacity, setNewRoomCapacity] = useState('4');
   const [isEditMode, setIsEditMode] = useState(externalIsEditMode || false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   // 同步外部传入的 bookings
   useEffect(() => {
@@ -338,10 +339,10 @@ const BookingTable = ({
     const capacity = room?.capacity || 0;
 
     let baseClass =
-      'h-14 border border-grid-border transition-all duration-200 cursor-pointer text-xs font-medium flex items-center justify-center relative overflow-hidden ';
+      'h-14 border border-gray-300 transition-all duration-200 cursor-pointer text-xs font-medium flex items-center justify-center relative overflow-hidden m-0.5 rounded-sm ';
 
     if (isSelected) {
-      baseClass += 'border-2 border-primary ';
+      baseClass += 'ring-2 ring-primary ring-inset shadow-sm ';
     }
 
     let isPast = false;
@@ -621,11 +622,11 @@ const BookingTable = ({
                     
                     return (
                       <div
-                        className={`w-5 h-5 border border-grid-border rounded ${
+                        className={`w-5 h-5 border border-gray-300 rounded-md ${
                           currentBook.userLevel === 'advanced'
                             ? 'bg-booking-advanced'
                             : 'bg-booking-beginner'
-                        } flex items-center justify-center text-[8px]`}
+                        } flex items-center justify-center text-[8px] font-semibold text-white shadow-sm`}
                         key={`player-${i}`}
                       >
                         {currentBook?.bookedBy?.charAt(0)}
@@ -637,16 +638,16 @@ const BookingTable = ({
                     length: Math.max(0, (room?.capacity || 0) - booking.reduce((total, book) => total + book.players, 0)) 
                   }).map((_, i) => (
                     <div 
-                      className="w-5 h-5 border border-grid-border rounded bg-white"
+                      className="w-5 h-5 border border-gray-300 rounded-md bg-white shadow-sm"
                       key={`empty-${i}`}
                     >
                     </div>
                   ))}
                 </div>
                 {/* 玩家数量信息 - 右下角固定位置 */}
-                <div className="absolute bottom-1 right-1 text-[10px] text-gray-600 bg-white bg-opacity-80 px-1 rounded flex items-center gap-1">
+                <div className="absolute bottom-1 right-1 text-[10px] text-gray-600 bg-white bg-opacity-90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm border border-gray-200">
                   {booking.reduce((total, book) => total + book.players, 0)}/{room?.capacity || 0}
-                  <User className="h-2.5 w-2.5" />
+                  {/* <User className="h-2.5 w-2.5" /> */}
                 </div>
               </div>
             </div>
@@ -659,7 +660,7 @@ const BookingTable = ({
               {booking.map((book, i) => (
                 <div className="flex flex-row space-x-2" key={i}>
                   <div
-                    className={`w-4 h-4 border border-grid-border rounded ${book.userLevel === 'advanced' ? 'bg-booking-advanced' : 'bg-booking-beginner'} `}
+                    className={`w-4 h-4 border border-gray-300 rounded-md ${book.userLevel === 'advanced' ? 'bg-booking-advanced' : 'bg-booking-beginner'} shadow-sm`}
                   />
                   <div className="font-semibold">{book.bookedBy}</div>
                 </div>
@@ -707,7 +708,7 @@ const BookingTable = ({
           {isEditMode ? 'Exit Edit' : 'Edit Mode'}
         </Button>
       </div>
-      <Card className="p-4">
+      <Card className="p-4 shadow-lg border-0">
         <div className="flex flex-col gap-4">
           {/* 第一排：控制选项 */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
@@ -763,7 +764,7 @@ const BookingTable = ({
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               {/* Date Picker */}
-              <Popover>
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
@@ -784,7 +785,12 @@ const BookingTable = ({
                   <Calendar
                     mode="single"
                     selected={selectedDate}
-                    onSelect={date => date && setSelectedDate(date)}
+                    onSelect={date => {
+                      if (date) {
+                        setSelectedDate(date);
+                        setIsDatePickerOpen(false);
+                      }
+                    }}
                     initialFocus
                     className={cn('p-3 pointer-events-auto')}
                   />
@@ -855,23 +861,23 @@ const BookingTable = ({
       </Card>
 
       {/* Table */}
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden shadow-lg border-0">
         <div
-          className="overflow-auto"
+          className="overflow-auto bg-white w-full"
           ref={tableScrollRef}
         >
           {isHorizontalTime ? (
             // Time horizontal, rooms vertical
-            <div className="min-w-full">
+            <div className="p-1 bg-gray-50" style={{ width: 'max-content' }}>
               <div
-                className="grid min-w-max"
+                className="grid gap-0.5"
                 style={{
                   gridTemplateColumns: `${isEditMode ? '140px' : '100px'} repeat(${timeSlots.length}, 80px)`,
                 }}
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border-b border-grid-border p-3 font-semibold text-sm sticky top-0 left-0 z-30"
+                  className="bg-grid-header border border-gray-400 p-3 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
                     width: isEditMode ? 140 : 100, 
                     minWidth: isEditMode ? 140 : 100, 
@@ -884,8 +890,12 @@ const BookingTable = ({
                   <div
                     key={time}
                     ref={el => (timeHeaderRefs.current[idx] = el)}
-                    className="bg-grid-header border-b border-l border-grid-border p-3 text-center font-medium text-sm sticky top-0 z-20"
-                    style={{ width: 80, minWidth: 80, maxWidth: 80 }}
+                    className="bg-grid-header border border-gray-400 p-3 text-center font-medium text-sm sticky top-0 z-20 shadow-sm rounded-sm"
+                    style={{ 
+                      width: 80, 
+                      minWidth: 80, 
+                      maxWidth: 80
+                    }}
                   >
                     {time}
                   </div>
@@ -895,7 +905,7 @@ const BookingTable = ({
                   .map(room => [
                     <div
                       key={`${room.id}-header`}
-                      className="bg-grid-header border-b border-grid-border p-3 font-medium text-sm flex items-center sticky left-0 z-20 h-full"
+                      className="bg-grid-header border border-gray-400 p-3 font-medium text-sm flex items-center sticky left-0 z-20 h-full shadow-sm rounded-sm"
                       style={{ 
                         width: isEditMode ? 140 : 100, 
                         minWidth: isEditMode ? 140 : 100, 
@@ -940,16 +950,16 @@ const BookingTable = ({
             </div>
           ) : (
             // Rooms horizontal, time vertical
-            <div className="min-w-full">
+            <div className="min-w-full p-1 bg-gray-50">
               <div
-                className="grid"
+                className="grid gap-0.5"
                 style={{
                   gridTemplateColumns: `${isEditMode ? '140px' : '100px'} repeat(${filteredRooms.length}, 100px)`,
                 }}
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border-b border-grid-border p-3 font-semibold text-sm sticky top-0 left-0 z-30"
+                  className="bg-grid-header border border-gray-400 p-3 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
                     width: isEditMode ? 140 : 100, 
                     minWidth: isEditMode ? 140 : 100, 
@@ -961,7 +971,7 @@ const BookingTable = ({
                 {filteredRooms.map(room => (
                   <div
                     key={room.id}
-                    className="bg-grid-header border-b border-l border-grid-border p-2 text-center font-medium text-sm sticky top-0 z-20 relative"
+                    className="bg-grid-header border border-gray-400 p-2 text-center font-medium text-sm sticky top-0 z-20 relative shadow-sm rounded-sm"
                     style={{ width: 100, minWidth: 100, maxWidth: 100 }}
                   >
                     <div className="flex flex-col items-center space-y-1">
@@ -998,7 +1008,7 @@ const BookingTable = ({
                   .map(time => [
                     <div
                       key={`${time}-header`}
-                      className="bg-grid-header border-b border-grid-border p-3 font-medium text-sm flex items-center justify-center sticky left-0 z-20"
+                      className="bg-grid-header border border-gray-400 p-3 font-medium text-sm flex items-center justify-center sticky left-0 z-20 shadow-sm rounded-sm"
                       style={{ 
                         width: isEditMode ? 140 : 100, 
                         minWidth: isEditMode ? 140 : 100, 
