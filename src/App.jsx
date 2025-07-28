@@ -42,6 +42,7 @@ function App() {
           <Route element={<AuthLayout />}>
             <Route path="/sign-in" element={<Sign />} />
             <Route path="/recovery/password" element={<Recovery />} />
+            <Route path="/dev/booking" element={<Booking />} />
           </Route>
 
           {/* Private Routes */}
