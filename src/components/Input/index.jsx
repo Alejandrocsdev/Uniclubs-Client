@@ -1,30 +1,30 @@
 // CSS Module
-import S from './style.module.css'
+import S from './style.module.css';
 // Libraries
-import { useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 // Components
-import EmailAddon from './addons/EmailAddon'
-import PasswordAddon from './addons/PasswordAddon'
+import EmailAddon from './addons/EmailAddon';
+import PasswordAddon from './addons/PasswordAddon';
 
 function Input({ name, ...props }) {
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(false);
 
-  const isPassword = name === 'password' || name === 'rePassword'
-  const isEmail = name === 'email'
+  const isPassword = name === 'password' || name === 'rePassword';
+  const isEmail = name === 'email';
 
   const {
     register,
-    formState: { errors }
-  } = useFormContext()
+    formState: { errors },
+  } = useFormContext();
 
-  const error = errors[name]?.message
+  const error = errors[name]?.message;
 
   const onInput = event => {
     if (name === 'username' || name === 'email') {
-      event.target.value = event.target.value.toLowerCase()
+      event.target.value = event.target.value.toLowerCase();
     }
-  }
+  };
 
   return (
     <div className={S.inputContainer}>
@@ -45,7 +45,7 @@ function Input({ name, ...props }) {
       {/* Email Add-On: Sends OTP */}
       {isEmail && <EmailAddon />}
     </div>
-  )
+  );
 }
 
-export default Input
+export default Input;

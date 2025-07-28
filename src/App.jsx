@@ -1,35 +1,35 @@
 // CSS
-import './assets/css/font.css'
-import './assets/css/global.css'
+import './assets/css/font.css';
+import './assets/css/global.css';
 // Libraries
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Custom Functions
-import { MessageProvider } from './contexts/MessageContext'
-import { useLoader } from './hooks'
+import { MessageProvider } from './contexts/MessageContext';
+import { useLoader } from './hooks';
 // Components
-import Error from './components/Error'
-import Message from './components/Message'
+import Error from './components/Error';
+import Message from './components/Message';
 // Layout
-import AuthLayout from './layouts/AuthLayout'
-import MainLayout from './layouts/MainLayout'
+import AuthLayout from './layouts/AuthLayout';
+import MainLayout from './layouts/MainLayout';
 // Laoder
-import ScreenLoader from './loaders/ScreenLoader'
+import ScreenLoader from './loaders/ScreenLoader';
 // Routes
-import Protected from './routes/Protected'
+import Protected from './routes/Protected';
 // Public Pages
-import Sign from './pages/Sign'
-import Recovery from './pages/Recovery'
+import Sign from './pages/Sign';
+import Recovery from './pages/Recovery';
 // Private Pages
-import Home from './pages/Home'
-import Booking from './pages/Booking'
-import Components from './pages/Components'
+import Home from './pages/Home';
+import Booking from './pages/Booking';
+import Components from './pages/Components';
 
 function App() {
-  const { loading, error } = useLoader()
+  const { loading, error } = useLoader();
 
-  if (loading) return <ScreenLoader />
+  if (loading) return <ScreenLoader />;
 
-  if (error) return <Error full />
+  if (error) return <Error full />;
 
   return (
     <BrowserRouter>
@@ -45,7 +45,11 @@ function App() {
           </Route>
 
           {/* Private Routes */}
-          <Route element={<Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />}>
+          <Route
+            element={
+              <Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />
+            }
+          >
             <Route element={<MainLayout />}>
               <Route index element={<Home />} />
               <Route path="/booking" element={<Booking />} />
@@ -58,7 +62,7 @@ function App() {
         </Routes>
       </MessageProvider>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

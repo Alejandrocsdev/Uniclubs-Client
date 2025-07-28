@@ -1,9 +1,9 @@
 // CSS Module
-import S from './style.module.css'
+import S from './style.module.css';
 // Libraries
-import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom';
 // Components
-import Header from './Header'
+import Header from './Header';
 
 function MainLayout() {
   return (
@@ -13,7 +13,7 @@ function MainLayout() {
         <Outlet />
       </div>
     </>
-  )
+  );
 }
 
-export default MainLayout
+export default MainLayout;

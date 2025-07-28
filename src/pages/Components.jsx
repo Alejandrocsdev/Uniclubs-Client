@@ -1,38 +1,66 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
-import { Checkbox } from '@/components/ui/checkbox'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Textarea } from '@/components/ui/textarea'
-import { Progress } from '@/components/ui/progress'
-import { Slider } from '@/components/ui/slider'
-import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { 
-  AlertCircle, 
-  CheckCircle, 
-  Info, 
-  Mail, 
-  User, 
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+  AlertCircle,
+  CheckCircle,
+  Info,
+  Mail,
+  User,
   Calendar as CalendarIcon,
   Settings,
-  Bell
-} from 'lucide-react'
+  Bell,
+} from 'lucide-react';
 
 export default function Components() {
-  const [date, setDate] = React.useState(new Date())
-  const [progress, setProgress] = React.useState(13)
+  const [date, setDate] = React.useState(new Date());
+  const [progress, setProgress] = React.useState(13);
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -185,16 +213,12 @@ export default function Components() {
             <CardContent className="space-y-4">
               <Alert>
                 <Info className="h-4 w-4" />
-                <AlertDescription>
-                  这是一个信息提示框
-                </AlertDescription>
+                <AlertDescription>这是一个信息提示框</AlertDescription>
               </Alert>
 
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  这是一个错误提示框
-                </AlertDescription>
+                <AlertDescription>这是一个错误提示框</AlertDescription>
               </Alert>
 
               <div className="space-y-2">
@@ -204,7 +228,12 @@ export default function Components() {
 
               <div className="space-y-2">
                 <Label>滑块</Label>
-                <Slider defaultValue={[50]} max={100} step={1} className="w-full" />
+                <Slider
+                  defaultValue={[50]}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
               </div>
 
               <Dialog>
@@ -246,9 +275,12 @@ export default function Components() {
                 <Label>日期选择器</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? date.toLocaleDateString() : "选择日期"}
+                      {date ? date.toLocaleDateString() : '选择日期'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
@@ -267,7 +299,9 @@ export default function Components() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">总用户</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      总用户
+                    </CardTitle>
                     <User className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -293,7 +327,9 @@ export default function Components() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">活跃用户</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      活跃用户
+                    </CardTitle>
                     <CheckCircle className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
@@ -309,5 +345,5 @@ export default function Components() {
         </TabsContent>
       </Tabs>
     </div>
-  )
-} 
+  );
+}
