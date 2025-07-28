@@ -1,8 +1,8 @@
 // CSS Module
-import S from './style.module.css'
+import S from './style.module.css';
 // Components
-import Icon from '../Icon'
-import Anchor from '../Anchor'
+import Icon from '../Icon';
+import Anchor from '../Anchor';
 
 function Card({ prevPath, title, children }) {
   return (
@@ -15,7 +15,7 @@ function Card({ prevPath, title, children }) {
       {title && <h2 className={S.cardTitle}>{title}</h2>}
       {children}
     </div>
-  )
+  );
 }
 
-export default Card
+export default Card;

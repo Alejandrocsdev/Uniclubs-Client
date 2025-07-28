@@ -15,7 +15,6 @@
 .success {
   color: var(--success-green);
   background-color: var(--success-background);
-
 }
 
 .error {

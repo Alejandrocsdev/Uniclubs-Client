@@ -3,7 +3,7 @@
   position: relative;
 
   @media (max-width: 40rem) {
-    margin-bottom: calc(var(--input-margin-bottom) - 0.5rem)
+    margin-bottom: calc(var(--input-margin-bottom) - 0.5rem);
   }
 }
 
@@ -36,7 +36,7 @@
 }
 
 /* Hide the default "eye" icon (password reveal button) in Microsoft Edge */
-input[type="password"]::-ms-reveal {
+input[type='password']::-ms-reveal {
   display: none;
 }
 

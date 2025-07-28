@@ -1,46 +1,46 @@
 // Libraries
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react';
 // Custome Functions
-import { api, axiosPublic } from '../api'
+import { api, axiosPublic } from '../api';
 
 const useLoader = () => {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    let retryCount = 0
-    const maxRetries = 10
-    const retryInterval = 2000
+    let retryCount = 0;
+    const maxRetries = 10;
+    const retryInterval = 2000;
 
-    let interval = undefined
+    let interval = undefined;
 
     const checkServer = async () => {
       await api(axiosPublic.get('/'), {
         onSuccess: () => {
-          setLoading(false)
-          clearInterval(interval)
-          return
-        }
-      })
+          setLoading(false);
+          clearInterval(interval);
+          return;
+        },
+      });
 
-      retryCount++
+      retryCount++;
 
       if (retryCount >= maxRetries) {
-        setLoading(false)
-        setError(true)
-        clearInterval(interval)
+        setLoading(false);
+        setError(true);
+        clearInterval(interval);
       }
-    }
+    };
 
     // Perform the first check immediately on mount
-    checkServer() // (0 + 1)
+    checkServer(); // (0 + 1)
     // Then repeat the check every retryInterval milliseconds
-    interval = setInterval(checkServer, retryInterval) // (1 ~ 9 + 1)
+    interval = setInterval(checkServer, retryInterval); // (1 ~ 9 + 1)
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
-  return { loading, error }
-}
+  return { loading, error };
+};
 
-export default useLoader
+export default useLoader;

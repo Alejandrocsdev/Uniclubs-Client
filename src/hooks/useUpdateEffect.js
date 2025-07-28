@@ -1,17 +1,17 @@
 // Libraries
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
 
 const useUpdateEffect = (effect, dependencies) => {
-  const isFirst = useRef(true)
+  const isFirst = useRef(true);
 
   useEffect(() => {
     if (isFirst.current) {
-      isFirst.current = false
-      return
+      isFirst.current = false;
+      return;
     }
 
-    return effect()
-  }, dependencies)
-}
+    return effect();
+  }, dependencies);
+};
 
-export default useUpdateEffect
+export default useUpdateEffect;

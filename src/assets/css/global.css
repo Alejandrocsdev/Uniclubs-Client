@@ -32,7 +32,11 @@ a {
 
 :root {
   --primary-text: black;
-  --primary-background: linear-gradient(135deg, hsl(230, 75%, 65%) 0%, hsl(270, 35%, 45%) 100%);
+  --primary-background: linear-gradient(
+    135deg,
+    hsl(230, 75%, 65%) 0%,
+    hsl(270, 35%, 45%) 100%
+  );
   --success-green: hsl(140, 100%, 35%);
   --success-background: hsl(140, 100%, 85%);
   --error-red: hsl(355, 100%, 65%);
@@ -77,13 +81,15 @@ a {
 
   /* Booking specific colors */
   --booking-available: 142 69% 58%;
-  --booking-occupied: 11, 80%, 60%;
+  --booking-occupied: 0 84% 60%;
   --booking-pending: 38 92% 50%;
   --booking-selected: 217 91% 60%;
   --booking-beginner: 210 100% 60%;
+  --booking-intermediate: 240 100% 65%;
   --booking-advanced: 270 100% 70%;
-  --booking-half-full: 46, 100%, 50%;
-  --booking-partial: 81, 33%, 55%;
+  --booking-half-full: 25 95% 53%;
+  --booking-partial: 48 100% 67%;
+  --booking-user: 180 70% 50%;
 
   /* Grid colors */
   --grid-header: 210 25% 92%;
