@@ -1,11 +1,17 @@
 // CSS Module
-import S from './style.module.css'
+import S from './style.module.css';
 // Libraries
-import HashLoader from 'react-spinners/HashLoader'
+import HashLoader from 'react-spinners/HashLoader';
 
 // https://www.davidhu.io/react-spinners
 // default: loading = true, size = 50, color = '#000000', speed = 1, override = {}
-const ScreenLoader = ({ loading, size = 80, color = '#ffffff', speed, override }) => {
+const ScreenLoader = ({
+  loading,
+  size = 80,
+  color = '#ffffff',
+  speed,
+  override,
+}) => {
   return (
     <div className={S.loader}>
       <HashLoader
@@ -16,7 +22,7 @@ const ScreenLoader = ({ loading, size = 80, color = '#ffffff', speed, override }
         cssOverride={override}
       />
     </div>
-  )
-}
+  );
+};
 
-export default ScreenLoader
+export default ScreenLoader;

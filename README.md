@@ -19,6 +19,7 @@ git pull
 ```
 
 ## 2. Install Dependencies
+
 In the frontend project directory, run:
 
 ```
@@ -26,6 +27,7 @@ npm install
 ```
 
 ## 3. Create `.env` File
+
 Create a `.env` file in the root of the frontend directory. Use the provided data for the contents. You need to configure the following variables:
 
 `PORT` — The server port for development

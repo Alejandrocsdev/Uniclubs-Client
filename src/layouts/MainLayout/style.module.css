@@ -1,4 +1,5 @@
 .container {
   min-height: 100dvh;
   background: var(--primary-background);
+  padding-top: 4rem; /* 64px to account for fixed header */
 }
