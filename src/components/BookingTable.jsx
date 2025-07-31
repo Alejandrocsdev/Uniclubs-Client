@@ -153,7 +153,7 @@ const initialBookings = [
     bookedBy: 'Lisa Chen',
     userLevel: 'beginner',
     userEmail: 'lisa.chen@company.com',
-    players: 4,
+    players: 1,
   },
   {
     id: '8',
@@ -205,6 +205,8 @@ const BookingTable = ({
   const [newRoomCapacity, setNewRoomCapacity] = useState('4');
   const [isEditMode, setIsEditMode] = useState(externalIsEditMode || false);
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [showNotification, setShowNotification] = useState(null);
+  const [showConflictConfirm, setShowConflictConfirm] = useState(null);
 
   // 同步外部传入的 bookings
   useEffect(() => {
@@ -422,7 +424,7 @@ const BookingTable = ({
     const room = rooms.find(r => r.id === roomId);
     const capacity = room?.capacity || 0;
     
-    // 检查当前用户在当前时间段的所有场地是否已有预订
+    // 1. 检查当前用户在当前时间段的所有场地是否已有预订
     const userBookingInTimeSlot = bookings.find(booking => 
       booking.timeSlot === timeSlot && 
       booking.date === dateStr && 
@@ -432,55 +434,124 @@ const BookingTable = ({
     // 检查当前用户在当前场地和时间段是否已有预订
     const userBookingInCurrentRoom = existingBookings.find(booking => booking.bookedBy === 'New User');
     
+    // 如果用户在当前房间已有预订，直接切换选择状态
     if (userBookingInCurrentRoom) {
-      // 如果用户在当前场地已有预订，则移除它
-      setBookings(prevBookings => 
-        prevBookings.filter(booking => 
-          !(booking.roomId === roomId && 
-            booking.timeSlot === timeSlot && 
-            booking.date === dateStr && 
-            booking.bookedBy === 'New User')
-        )
-      );
-    } else {
-      // 先移除该用户在同一时段其他场地的预订（如果有的话）
-      if (userBookingInTimeSlot) {
-        setBookings(prevBookings => 
-          prevBookings.filter(booking => 
-            !(booking.timeSlot === timeSlot && 
-              booking.date === dateStr && 
-              booking.bookedBy === 'New User')
-          )
-        );
-      }
-      
-      // 计算当前已有的玩家总数
-      const currentPlayerCount = existingBookings.reduce((total, booking) => total + booking.players, 0);
-      const selectedPlayerCount = parseInt(selectedPlayers, 10);
-      
-      // 检查是否超过容量
-      if (currentPlayerCount + selectedPlayerCount > capacity) {
-        alert(`Cannot add booking: Selected ${selectedPlayerCount} player(s) plus existing ${currentPlayerCount} player(s) would exceed venue capacity of ${capacity}.`);
-        return;
-      }
-      
-      // 添加新预订
-      const newBooking = {
-        id: Date.now().toString(), // 使用时间戳作为临时ID
-        roomId: roomId,
-        timeSlot: timeSlot,
-        date: dateStr,
-        status: 'occupied',
-        bookedBy: 'New User', // 可以后续修改为实际用户
-        userLevel: selectedLevel, // 使用当前选中的级别
-        userEmail: 'new.user@company.com',
-        players: selectedPlayerCount, // 使用当前选中的玩家数量
-      };
-      
-      setBookings(prevBookings => [...prevBookings, newBooking]);
+      onCellSelect(selectedCell === cellId ? null : cellId);
+      return;
     }
+
+    // 4. 检查时段是否已过
+    const today = new Date();
+    const isToday = selectedDate &&
+      today.getFullYear() === selectedDate.getFullYear() &&
+      today.getMonth() === selectedDate.getMonth() &&
+      today.getDate() === selectedDate.getDate();
+
+    const isBeforeToday = selectedDate &&
+      (selectedDate.getFullYear() < today.getFullYear() ||
+        (selectedDate.getFullYear() === today.getFullYear() &&
+          selectedDate.getMonth() < today.getMonth()) ||
+        (selectedDate.getFullYear() === today.getFullYear() &&
+          selectedDate.getMonth() === today.getMonth() &&
+          selectedDate.getDate() < today.getDate()));
+
+    let isPastTime = false;
+    if (isBeforeToday) {
+      isPastTime = true;
+    } else if (isToday) {
+      const [slotHour, slotMin] = timeSlot.split(':').map(Number);
+      const nowMins = today.getHours() * 60 + today.getMinutes();
+      const slotMins = slotHour * 60 + slotMin;
+      if (slotMins < nowMins) {
+        isPastTime = true;
+      }
+    }
+
+    if (isPastTime) {
+      setShowNotification({
+        type: 'error',
+        message: 'This time slot has already passed. Please select another time slot.'
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+      onCellSelect(cellId); // 仍然显示面板
+      return;
+    }
+
+    // 2. 检查此时段此球场是否已满
+    const currentPlayerCount = existingBookings.reduce((total, booking) => total + booking.players, 0);
+    if (currentPlayerCount >= capacity) {
+      setShowNotification({
+        type: 'error',
+        message: 'This time slot is full. Please select another time slot.'
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+      onCellSelect(cellId); // 仍然显示面板
+      return;
+    }
+
+    // 3. 检查预约人数是否会超过容量
+    const selectedPlayerCount = parseInt(selectedPlayers, 10);
+    if (currentPlayerCount + selectedPlayerCount > capacity) {
+      setShowNotification({
+        type: 'error',
+        message: `Cannot add ${selectedPlayerCount} player(s). Only ${capacity - currentPlayerCount} spot(s) available. Please select another time slot.`
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+      onCellSelect(cellId); // 仍然显示面板
+      return;
+    }
+
+    // 1. 如果用户在同时段有其他预订，显示确认对话框
+    if (userBookingInTimeSlot && userBookingInTimeSlot.roomId !== roomId) {
+      setShowConflictConfirm({
+        timeSlot,
+        newRoomId: roomId,
+        existingBooking: userBookingInTimeSlot
+      });
+      return;
+    }
+
+    // 执行预订操作
+    executeBooking(roomId, timeSlot, dateStr, selectedPlayerCount);
+    onCellSelect(cellId);
+  };
+
+  const executeBooking = (roomId, timeSlot, dateStr, playerCount) => {
+    // 添加新预订
+    const newBooking = {
+      id: Date.now().toString(),
+      roomId: roomId,
+      timeSlot: timeSlot,
+      date: dateStr,
+      status: 'occupied',
+      bookedBy: 'New User',
+      userLevel: selectedLevel,
+      userEmail: 'new.user@company.com',
+      players: playerCount,
+    };
     
-    onCellSelect(selectedCell === cellId ? null : cellId);
+    setBookings(prevBookings => [...prevBookings, newBooking]);
+  };
+
+  const handleConflictConfirm = () => {
+    const { timeSlot, newRoomId, existingBooking } = showConflictConfirm;
+    const dateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : todayStr;
+    const selectedPlayerCount = parseInt(selectedPlayers, 10);
+
+    // 移除同时段的现有预订
+    setBookings(prevBookings => 
+      prevBookings.filter(booking => booking.id !== existingBooking.id)
+    );
+
+    // 添加新预订
+    executeBooking(newRoomId, timeSlot, dateStr, selectedPlayerCount);
+    
+    setShowConflictConfirm(null);
+    onCellSelect(`${newRoomId}-${timeSlot}`);
+  };
+
+  const handleConflictCancel = () => {
+    setShowConflictConfirm(null);
   };
 
   const toggleAxis = () => {
@@ -1199,6 +1270,56 @@ const BookingTable = ({
                   className="flex-1 sm:flex-none"
                 >
                   Add Field
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Notification */}
+      {showNotification && (
+        <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-md shadow-lg z-50 ${
+          showNotification.type === 'error' 
+            ? 'bg-red-500 text-white' 
+            : 'bg-green-500 text-white'
+        }`}>
+          {showNotification.message}
+        </div>
+      )}
+
+      {/* Conflict Confirmation Modal */}
+      {showConflictConfirm && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={handleConflictCancel}
+        >
+          <Card 
+            className="p-6 max-w-md mx-4 w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground">Conflict Detected</h3>
+              <p className="text-sm text-muted-foreground">
+                You already have a booking for this time slot at{' '}
+                <strong>{rooms.find(r => r.id === showConflictConfirm.existingBooking.roomId)?.name || showConflictConfirm.existingBooking.roomId}</strong>. 
+                Would you like to replace it with your new booking for{' '}
+                <strong>{rooms.find(r => r.id === showConflictConfirm.newRoomId)?.name || showConflictConfirm.newRoomId}</strong>?
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={handleConflictCancel}
+                  className="flex-1 sm:flex-none"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="default" 
+                  onClick={handleConflictConfirm}
+                  className="flex-1 sm:flex-none"
+                >
+                  Replace Booking
                 </Button>
               </div>
             </div>
