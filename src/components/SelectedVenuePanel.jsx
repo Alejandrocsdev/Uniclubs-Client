@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card } from './ui/card';
 import { X, User, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -14,6 +15,7 @@ const SelectedVenuePanel = ({
   bookings,
   onBookingsChange,
 }) => {
+  const { user } = useAuth();
   const [deleteConfirmBooking, setDeleteConfirmBooking] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
@@ -45,7 +47,7 @@ const SelectedVenuePanel = ({
   const remaining = (room?.capacity || 0) - totalPlayers;
 
   // 检查当前用户是否已有预订
-  const userBooking = booking.find(book => book.bookedBy === 'New User');
+  const userBooking = booking.find(book => book.bookedBy === user?.username);
   const hasUserBooking = !!userBooking;
 
   // 检查时间状态
@@ -143,7 +145,7 @@ const SelectedVenuePanel = ({
                   <div 
                     key={`${book.id}-${i}`} 
                     className={`flex items-center gap-3 justify-between p-3 rounded-lg border ${
-                      book.bookedBy === 'New User' 
+                      book.bookedBy === user?.username 
                         ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-300' 
                         : 'bg-gray-50 border-gray-200'
                     }`}
@@ -159,7 +161,7 @@ const SelectedVenuePanel = ({
                         {book.userLevel === 'advanced' ? 'Advanced' : 'Beginner'}
                       </span>
                       <span className="text-base font-medium flex items-center gap-2">
-                        {book.bookedBy === 'New User' ? (
+                        {book.bookedBy === user?.username ? (
                           <span className="flex items-center gap-2">
                             <strong className="text-blue-700">You</strong>
                             <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">

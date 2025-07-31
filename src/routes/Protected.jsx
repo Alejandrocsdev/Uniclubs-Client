@@ -3,6 +3,7 @@ import { useLocation, Outlet, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 // Custom Functions
 import { api, axiosPrivate } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 import useRedux from '../hooks/useRedux';
 // Laoder
 import ScreenLoader from '../loaders/ScreenLoader';
@@ -12,6 +13,7 @@ import { isTokenValid, isAllowed } from '../utils';
 const Protected = ({ allowedRoles }) => {
   const location = useLocation();
   const { setAuth, clearAuth, token } = useRedux();
+  const { user, setLoginRedirect } = useAuth();
   const [state, setState] = useState('loading');
 
   useEffect(() => {
@@ -35,12 +37,14 @@ const Protected = ({ allowedRoles }) => {
           onError: () => {
             setState('invalid');
             clearAuth();
+            // Remember the current path for redirect after login
+            setLoginRedirect(location.pathname);
           },
         });
       }
     };
     routesAuth();
-  }, [token, location.pathname]);
+  }, [token, location.pathname, setLoginRedirect]);
 
   if (state === 'loading') return <ScreenLoader />;
 

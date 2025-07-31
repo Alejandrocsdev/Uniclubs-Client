@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { RotateCw, CalendarIcon, Filter, User, Settings, Plus, Edit2, Check, X, Trash2 } from 'lucide-react';
@@ -189,6 +190,7 @@ const BookingTable = ({
   isEditMode: externalIsEditMode,
   onEditModeChange
 }) => {
+  const { user } = useAuth();
   const [isHorizontalTime, setIsHorizontalTime] = useState(true);
   const [selectedDate, setSelectedDate] = useState(externalSelectedDate || new Date());
   const [filter, setFilter] = useState('all');
@@ -376,7 +378,7 @@ const BookingTable = ({
     }
     
     // 检查是否有当前用户的预订
-    const hasUserBooking = bookings && bookings.some(booking => booking.bookedBy === 'New User');
+    const hasUserBooking = bookings && bookings.some(booking => booking.bookedBy === user?.username);
     
     // 未來日期 isPast 保持 false
     if (!bookings || bookings.length === 0) {
@@ -428,11 +430,11 @@ const BookingTable = ({
     const userBookingInTimeSlot = bookings.find(booking => 
       booking.timeSlot === timeSlot && 
       booking.date === dateStr && 
-      booking.bookedBy === 'New User'
+      booking.bookedBy === user?.username
     );
     
     // 检查当前用户在当前场地和时间段是否已有预订
-    const userBookingInCurrentRoom = existingBookings.find(booking => booking.bookedBy === 'New User');
+    const userBookingInCurrentRoom = existingBookings.find(booking => booking.bookedBy === user?.username);
     
     // 如果用户在当前房间已有预订，直接切换选择状态
     if (userBookingInCurrentRoom) {
@@ -524,9 +526,9 @@ const BookingTable = ({
       timeSlot: timeSlot,
       date: dateStr,
       status: 'occupied',
-      bookedBy: 'New User',
+      bookedBy: user?.username,
       userLevel: selectedLevel,
-      userEmail: 'new.user@company.com',
+      userEmail: user?.email,
       players: playerCount,
     };
     

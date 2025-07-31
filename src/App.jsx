@@ -5,6 +5,7 @@ import './assets/css/global.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Custom Functions
 import { MessageProvider } from './contexts/MessageContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { useLoader } from './hooks';
 // Components
 import Error from './components/Error';
@@ -33,38 +34,40 @@ function App() {
 
   return (
     <BrowserRouter>
-      <MessageProvider>
-        {/* Global Message */}
-        <Message />
+      <AuthProvider>
+        <MessageProvider>
+          {/* Global Message */}
+          <Message />
 
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<AuthLayout />}>
-            <Route path="/sign-in" element={<Sign />} />
-            <Route path="/recovery/password" element={<Recovery />} />
-          </Route>
-
-          <Route element={<MainLayout />}>
-            <Route path="/dev/booking" element={<Booking />} />
-          </Route>
-
-          {/* Private Routes */}
-          <Route
-            element={
-              <Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />
-            }
-          >
-            <Route element={<MainLayout />}>
-              <Route index element={<Home />} />
-              <Route path="/booking" element={<Booking />} />
-              <Route path="/components" element={<Components />} />
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<AuthLayout />}>
+              <Route path="/sign-in" element={<Sign />} />
+              <Route path="/recovery/password" element={<Recovery />} />
             </Route>
-          </Route>
 
-          {/* Catch-all fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </MessageProvider>
+            <Route element={<MainLayout />}>
+              <Route path="/dev/booking" element={<Booking />} />
+            </Route>
+
+            {/* Private Routes */}
+            <Route
+              element={
+                <Protected allowedRoles={['guest', 'user', 'admin', 'owner']} />
+              }
+            >
+              <Route element={<MainLayout />}>
+                <Route index element={<Home />} />
+                <Route path="/booking" element={<Booking />} />
+                <Route path="/components" element={<Components />} />
+              </Route>
+            </Route>
+
+            {/* Catch-all fallback route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </MessageProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

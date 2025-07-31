@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 // Custom Functions
 import { api, axiosPrivate } from '../../api';
 import { useMessage } from '../../contexts/MessageContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useRedux, useUpdateEffect } from '../../hooks';
 // Validations
 import { signInSchema, signUpSchema } from '../../validations';
@@ -21,6 +22,7 @@ function Sign() {
   const [formExtra, setFormExtra] = useState(null);
   const { setSucMsg, setErrMsg } = useMessage();
   const { clearAuth } = useRedux();
+  const { refetchUser, getAndClearRedirect } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
@@ -32,15 +34,37 @@ function Sign() {
 
   const onSignIn = async formData => {
     await api(axiosPrivate.post('/api/auth/sign-in', formData), {
-      onSuccess: () => {
-        setSucMsg('Sign in successfully.');
-        navigate('/');
+      onSuccess: async () => {
+        setSucMsg('Sign in successfully. Redirecting...');
+        console.log('Login successful, fetching user data...');
+        
+        try {
+          // Refresh user data from the server
+          await refetchUser();
+          console.log('User data refetched successfully');
+          
+          // Small delay to ensure state updates are propagated
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          // Navigate to the intended page or default to booking
+          const redirectTo = getAndClearRedirect();
+          console.log('Redirecting to:', redirectTo);
+          navigate(redirectTo);
+        } catch (error) {
+          console.error('Failed to fetch user data after login:', error);
+          // Even if refetch fails, still navigate since login was successful
+          setTimeout(() => {
+            navigate('/booking');
+          }, 500);
+        }
       },
       onError: error => {
         if (error.status === 429) {
           setErrMsg('Too many sign in attempts. Please try again later.');
+        } else if (error.status === 401) {
+          setErrMsg('Invalid username or password.');
         } else {
-          setErrMsg('Sign in failed.');
+          setErrMsg('Sign in failed. Please try again.');
         }
         clearAuth();
         reset();

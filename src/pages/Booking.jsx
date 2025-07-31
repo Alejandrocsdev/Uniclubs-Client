@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import BookingTable, { rooms, sampleBookings } from '@/components/BookingTable';
 import SelectedVenuePanel from '@/components/SelectedVenuePanel';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { User, LogIn, LogOut } from 'lucide-react';
 import { Toaster as Sonner, toast } from 'sonner';
 
 const Booking = () => {
@@ -8,6 +11,7 @@ const Booking = () => {
   const [bookings, setBookings] = useState(sampleBookings);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isEditMode, setIsEditMode] = useState(false);
+  const { user, logout, loading } = useAuth();
 
   const getBookingStatus = (roomId, timeSlot) => {
     const dateStr = selectedDate.toISOString().slice(0, 10);
