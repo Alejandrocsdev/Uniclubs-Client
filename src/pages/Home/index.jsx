@@ -37,6 +37,7 @@ function Home() {
   return (
     <main className={S.main}>
       <Card>
+        HOME
         <Form
           extra={setFormExtra}
           // schema={updatePwdSchema}
