@@ -20,13 +20,6 @@ export const AuthProvider = ({ children }) => {
       console.log('Fetching user data...');
       console.log('Current cookies:', document.cookie);
       
-      await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include', // Include cookies for authentication
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
       const response = await fetch('/api/auth/me', {
         method: 'GET',
         credentials: 'include', // Include cookies for authentication
