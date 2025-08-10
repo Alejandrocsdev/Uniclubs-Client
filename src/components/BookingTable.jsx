@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { RotateCw, CalendarIcon, Filter, User, Settings, Plus, Edit2, Check, X, Trash2 } from 'lucide-react';
+import { RotateCw, CalendarIcon, Filter, User, Settings, Plus, Edit2, Check, X, Trash2, ChevronUp } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -196,7 +196,7 @@ const BookingTable = ({
   const [filter, setFilter] = useState('all');
   const [bookings, setBookings] = useState(externalBookings || initialBookings);
   const [selectedPlayers, setSelectedPlayers] = useState('1');
-  const [selectedLevel, setSelectedLevel] = useState('beginner');
+  const [selectedLevel, setSelectedLevel] = useState('intermediate');
   const [rooms, setRooms] = useState(initialRooms);
   const [editRoomName, setEditRoomName] = useState('');
   const [editRoomCapacity, setEditRoomCapacity] = useState('4');
@@ -209,6 +209,29 @@ const BookingTable = ({
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(null);
   const [showConflictConfirm, setShowConflictConfirm] = useState(null);
+  const [isControlPanelCollapsed, setIsControlPanelCollapsed] = useState(false);
+
+  // 新增：滚动监听相关状态
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [scrollDirection, setScrollDirection] = useState('up');
+  const isScrolling = useRef(false);
+  const manualToggle = useRef(false);
+  const isTouching = useRef(false);
+
+  // 检测是否为触摸设备
+  const isTouchDevice = () => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  };
+
+  // 手动切换处理函数
+  const handleManualToggle = () => {
+    manualToggle.current = true;
+    setIsControlPanelCollapsed(!isControlPanelCollapsed);
+    // 延迟重置手动切换标志
+    setTimeout(() => {
+      manualToggle.current = false;
+    }, 500);
+  };
 
   // 同步外部传入的 bookings
   useEffect(() => {
@@ -251,6 +274,89 @@ const BookingTable = ({
       onEditModeChange(isEditMode);
     }
   }, [isEditMode, onEditModeChange]);
+
+  // 新增：滚动监听 useEffect
+  useEffect(() => {
+    let ticking = false;
+    
+    // 触摸事件处理
+    const handleTouchStart = () => {
+      isTouching.current = true;
+    };
+    
+    const handleTouchEnd = () => {
+      // 延迟重置触摸状态，因为滚动可能在触摸结束后继续
+      setTimeout(() => {
+        isTouching.current = false;
+      }, 150);
+    };
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // 防止在状态更新期间或手动切换期间处理滚动事件
+          if (isScrolling.current || manualToggle.current) {
+            ticking = false;
+            return;
+          }
+          
+          // 在触摸设备上，只有在非触摸滚动时才自动折叠
+          // 这样可以避免在用户主动滚动时的奇怪行为
+          const isTouch = isTouchDevice();
+          if (isTouch && isTouching.current) {
+            ticking = false;
+            return;
+          }
+          
+          // 移动设备使用更大的阈值
+          const isMobile = window.innerWidth <= 768;
+          const scrollThreshold = isMobile ? 50 : 10; // 进一步增加移动设备阈值
+          
+          if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
+            const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+            
+            if (direction !== scrollDirection) {
+              isScrolling.current = true;
+              
+              setScrollDirection(direction);
+              
+              // 根据滚动方向自动展开/收起控制面板
+              if (direction === 'down') {
+                setIsControlPanelCollapsed(true);
+              } else if (direction === 'up') {
+                setIsControlPanelCollapsed(false);
+              }
+              
+              // 移动设备使用更长的延迟
+              const delay = isMobile ? 500 : 100;
+              setTimeout(() => {
+                isScrolling.current = false;
+              }, delay);
+            }
+            
+            setLastScrollY(currentScrollY);
+          }
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // 添加事件监听器
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [lastScrollY, scrollDirection]);
 
   // 新增：用於滾動到當前時間
   const tableScrollRef = useRef(null);
@@ -316,9 +422,8 @@ const BookingTable = ({
 
     if (occupancyRatio >= 1) {
       return 'full';
-    } else if (occupancyRatio >= 0.5) {
-      return 'half-full';
     } else {
+      // Any booking that's not full is "open to join"
       return 'partial';
     }
   };
@@ -403,9 +508,8 @@ const BookingTable = ({
     let statusClass = '';
     if (occupancyRatio >= 1) {
       statusClass = 'bg-booking-occupied text-white hover:opacity-90';
-    } else if (occupancyRatio >= 0.5) {
-      statusClass = 'bg-booking-half-full text-white hover:opacity-90';
     } else {
+      // Any booking that's not full is "open to join"
       statusClass = 'bg-booking-partial text-white hover:opacity-90';
     }
     return (
@@ -519,6 +623,8 @@ const BookingTable = ({
   };
 
   const executeBooking = (roomId, timeSlot, dateStr, playerCount) => {
+    console.log('Creating booking with level:', selectedLevel);
+    
     // 添加新预订
     const newBooking = {
       id: Date.now().toString(),
@@ -532,6 +638,7 @@ const BookingTable = ({
       players: playerCount,
     };
     
+    console.log('New booking created:', newBooking);
     setBookings(prevBookings => [...prevBookings, newBooking]);
   };
 
@@ -695,9 +802,11 @@ const BookingTable = ({
                     
                     return (
                       <div
-                        className={`w-5 h-5 border border-gray-300 rounded-md ${
+                        className={`w-5 h-5 border border-gray-300 rounded-full ${
                           currentBook.userLevel === 'advanced'
                             ? 'bg-booking-advanced'
+                            : currentBook.userLevel === 'intermediate'
+                            ? 'bg-booking-intermediate'
                             : 'bg-booking-beginner'
                         } flex items-center justify-center text-[8px] font-semibold text-white shadow-sm`}
                         key={`player-${i}`}
@@ -711,17 +820,16 @@ const BookingTable = ({
                     length: Math.max(0, (room?.capacity || 0) - booking.reduce((total, book) => total + book.players, 0)) 
                   }).map((_, i) => (
                     <div 
-                      className="w-5 h-5 border border-gray-300 rounded-md bg-white shadow-sm"
+                      className="w-5 h-5 border border-gray-300 rounded-full bg-white shadow-sm"
                       key={`empty-${i}`}
                     >
                     </div>
                   ))}
                 </div>
                 {/* 玩家数量信息 - 右下角固定位置 */}
-                <div className="absolute bottom-1 right-1 text-[10px] text-gray-600 bg-white bg-opacity-90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm border border-gray-200">
+                {/* <div className="absolute bottom-1 right-1 text-[10px] text-gray-600 bg-white bg-opacity-90 px-1.5 py-0.5 rounded-md flex items-center gap-1 shadow-sm border border-gray-200">
                   {booking.reduce((total, book) => total + book.players, 0)}/{room?.capacity || 0}
-                  {/* <User className="h-2.5 w-2.5" /> */}
-                </div>
+                </div> */}
               </div>
             </div>
           </TooltipTrigger>
@@ -733,14 +841,23 @@ const BookingTable = ({
               {booking.map((book, i) => (
                 <div className="flex flex-row space-x-2" key={i}>
                   <div
-                    className={`w-4 h-4 border border-gray-300 rounded-md ${book.userLevel === 'advanced' ? 'bg-booking-advanced' : 'bg-booking-beginner'} shadow-sm`}
+                    className={`w-4 h-4 border border-gray-300 rounded-full ${
+                      book.userLevel === 'advanced' 
+                        ? 'bg-booking-advanced' 
+                        : book.userLevel === 'intermediate'
+                        ? 'bg-booking-intermediate'
+                        : 'bg-booking-beginner'
+                    } shadow-sm`}
                   />
-                  <div className="font-semibold">{book.bookedBy}</div>
+                  <div className="font-semibold">
+                    {book.bookedBy || "You"}
+                    {book.players > 1 && ` ( ${book.players} )`}
+                  </div>
                 </div>
               ))}
               <div className="text-sm space-y-1">
                 <div>
-                  <strong>Field:</strong> {room?.name} ({booking.length}/
+                  <strong>Field:</strong> {room?.name} ({booking.reduce((total, book) => total + book.players, 0)}/
                   {room?.capacity || 0})
                 </div>
                 <div>
@@ -748,11 +865,9 @@ const BookingTable = ({
                 </div>
                 <div>
                   <strong>Status:</strong>{' '}
-                  {booking.length >= (room?.capacity || 0)
+                  {booking.reduce((total, book) => total + book.players, 0) >= (room?.capacity || 0)
                     ? 'Full'
-                    : booking.length >= (room?.capacity || 0) / 2
-                      ? 'Half Full'
-                      : 'Available'}
+                    : 'Open to Join'}
                 </div>
               </div>
             </div>
@@ -782,153 +897,143 @@ const BookingTable = ({
         </Button>
       </div>
       <Card className="p-4 shadow-lg border-0">
-        <div className="flex flex-col gap-4">
-          {/* 第一排：控制选项 */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <User className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Players" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1 Player</SelectItem>
-                  <SelectItem value="2">2 Players</SelectItem>
-                  <SelectItem value="3">3 Players</SelectItem>
-                  <SelectItem value="4">4 Players</SelectItem>
-                </SelectContent>
-              </Select>
+        <div className="flex flex-col ">
 
-              <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
-                <SelectTrigger className="w-full sm:w-[170px]">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="beginner"
-                    className="flex items-center gap-2"
-                  >
-                    <div className="flex flex-row space-x-2">
-                      <div className="w-4 h-4 bg-booking-beginner border border-grid-border rounded" />
+          {/* 可折叠的内容区域 */}
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            isControlPanelCollapsed ? 'max-h-0' : 'max-h-96'
+          }`}>
+            <div className="space-y-4">
+              {/* 第一排：控制选项 */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
+                    <SelectTrigger className="w-full sm:w-[140px]">
+                      <User className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Players" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Player</SelectItem>
+                      <SelectItem value="2">2 Players</SelectItem>
+                      <SelectItem value="3">3 Players</SelectItem>
+                      <SelectItem value="4">4 Players</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
+                    <SelectTrigger className="w-full sm:w-[170px]">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="beginner"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex flex-row space-x-2">
+                          <div className="w-4 h-4 bg-booking-beginner border border-grid-border rounded-full" />
+                          <span>Beginner</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="intermediate"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex flex-row space-x-2">
+                          <div className="w-4 h-4 bg-booking-intermediate border border-grid-border rounded-full" />
+                          <span>Intermediate</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem
+                        value="advanced"
+                        className="flex items-center gap-2"
+                      >
+                        <div className="flex flex-row space-x-2">
+                          <div className="w-4 h-4 bg-booking-advanced border border-grid-border rounded-full" />
+                          <span>Advanced</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+
+                  {/* Filter */}
+                  <Select value={filter} onValueChange={value => setFilter(value)}>
+                    <SelectTrigger className="w-full sm:w-[140px]">
+                      <Filter className="mr-2 h-4 w-4" />
+                      <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Rooms</SelectItem>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="partial">Open to Join</SelectItem>
+                      <SelectItem value="full">Full</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-card rounded"
+                          style={{ border: '1px solid rgb(149, 155, 167)' }}
+                      ></div>
+                      <span>Available</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-user rounded"></div>
+                      <span>My Booking</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-partial rounded"></div>
+                      <span>Open to Join</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-occupied rounded"></div>
+                      <span>Full</span>
+                    </div>
+                
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-beginner rounded-full"></div>
                       <span>Beginner</span>
                     </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="intermediate"
-                    className="flex items-center gap-2"
-                  >
-                    <div className="flex flex-row space-x-2">
-                      <div className="w-4 h-4 bg-booking-intermediate border border-grid-border rounded" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-intermediate rounded-full"></div>
                       <span>Intermediate</span>
                     </div>
-                  </SelectItem>
-                  <SelectItem
-                    value="advanced"
-                    className="flex items-center gap-2"
-                  >
-                    <div className="flex flex-row space-x-2">
-                      <div className="w-4 h-4 bg-booking-advanced border border-grid-border rounded" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-booking-advanced rounded-full"></div>
                       <span>Advanced</span>
                     </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              {/* Date Picker */}
-              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full sm:w-[200px] justify-start text-left font-normal',
-                      !selectedDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? (
-                      format(selectedDate, 'PPP')
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={date => {
-                      if (date) {
-                        setSelectedDate(date);
-                        setIsDatePickerOpen(false);
-                      }
-                    }}
-                    initialFocus
-                    className={cn('p-3 pointer-events-auto')}
-                  />
-                </PopoverContent>
-              </Popover>
-
-              {/* Filter */}
-              <Select value={filter} onValueChange={value => setFilter(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Rooms</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="half-full">Half Full</SelectItem>
-                  <SelectItem value="full">Full</SelectItem>
-                </SelectContent>
-              </Select>
-
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-card rounded"
-                      style={{ border: '1px solid rgb(149, 155, 167)' }}
-                  ></div>
-                  <span>Available</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-user rounded"></div>
-                  <span>My Booking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-partial border rounded"></div>
-                  <span>Light Booking</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-half-full rounded"></div>
-                  <span>Half Full</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-occupied rounded"></div>
-                  <span>Full</span>
-                </div>
-        
-              </div>
-              <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-beginner rounded"></div>
-                  <span>Beginner</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-intermediate rounded"></div>
-                  <span>Intermediate</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-booking-advanced rounded"></div>
-                  <span>Advanced</span>
-                </div>
-              </div>
-            </div>
+            {/* 折叠控制按钮 */}
+          <div className="flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleManualToggle}
+              className={`${isControlPanelCollapsed ? 'h-8 px-3' : 'h-8 w-8'} p-0 transition-transform duration-200`}
+            >
+            
+              {isControlPanelCollapsed && (
+                <span className="text-sm font-medium mr-2">Show Controls</span>
+              )}
+              <ChevronUp 
+                className={`h-4 w-4 transition-transform duration-200 ${
+                  isControlPanelCollapsed ? 'rotate-180' : ''
+                }`} 
+              />
+            </Button>
           </div>
         </div>
       </Card>
@@ -945,19 +1050,43 @@ const BookingTable = ({
               <div
                 className="grid gap-0.5"
                 style={{
-                  gridTemplateColumns: `${isEditMode ? '140px' : '100px'} repeat(${timeSlots.length}, 80px)`,
+                  gridTemplateColumns: `${isEditMode ? '140px' : '80px'} repeat(${timeSlots.length}, 70px)`,
                 }}
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border border-gray-400 p-3 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
+                  className="bg-grid-header border border-gray-400 p-2 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
-                    width: isEditMode ? 140 : 100, 
-                    minWidth: isEditMode ? 140 : 100, 
-                    maxWidth: isEditMode ? 140 : 100 
+                    width: isEditMode ? 140 : 80, 
+                    minWidth: isEditMode ? 140 : 80, 
+                    maxWidth: isEditMode ? 140 : 80 
                   }}
                 >
-                  Field/Time
+                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full h-full p-1 text-[15px] font-bold hover:bg-grid-hover justify-center text-center leading-tight"
+                      >
+                        <CalendarIcon className="h-4 w-4 hidden sm:inline-block" />
+                        {format(selectedDate, 'MMM dd')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={date => {
+                          if (date) {
+                            setSelectedDate(date);
+                            setIsDatePickerOpen(false);
+                          }
+                        }}
+                        initialFocus
+                        className={cn('p-3 pointer-events-auto')}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 {timeSlots.map((time, idx) => (
                   <div
@@ -965,9 +1094,9 @@ const BookingTable = ({
                     ref={el => (timeHeaderRefs.current[idx] = el)}
                     className="bg-grid-header border border-gray-400 p-3 text-center font-medium text-sm sticky top-0 z-20 shadow-sm rounded-sm"
                     style={{ 
-                      width: 80, 
-                      minWidth: 80, 
-                      maxWidth: 80
+                      width: 70, 
+                      minWidth: 70, 
+                      maxWidth: 70
                     }}
                   >
                     {time}
@@ -980,9 +1109,9 @@ const BookingTable = ({
                       key={`${room.id}-header`}
                       className="bg-grid-header border border-gray-400 p-3 font-medium text-sm flex items-center sticky left-0 z-20 h-full shadow-sm rounded-sm"
                       style={{ 
-                        width: isEditMode ? 140 : 100, 
-                        minWidth: isEditMode ? 140 : 100, 
-                        maxWidth: isEditMode ? 140 : 100 
+                        width: isEditMode ? 140 : 80, 
+                        minWidth: isEditMode ? 140 : 80, 
+                        maxWidth: isEditMode ? 140 : 80 
                       }}
                     >
                       <div className="flex flex-col w-full h-full justify-center space-y-1">
@@ -1027,25 +1156,48 @@ const BookingTable = ({
               <div
                 className="grid gap-0.5"
                 style={{
-                  gridTemplateColumns: `${isEditMode ? '140px' : '100px'} repeat(${filteredRooms.length}, 100px)`,
+                  gridTemplateColumns: `${isEditMode ? '140px' : '100px'} repeat(${filteredRooms.length}, 90px)`,
                 }}
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border border-gray-400 p-3 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
+                  className="bg-grid-header border border-gray-400 p-2 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
                     width: isEditMode ? 140 : 100, 
                     minWidth: isEditMode ? 140 : 100, 
                     maxWidth: isEditMode ? 140 : 100 
                   }}
                 >
-                  Time / Room
+                  <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="w-full h-full p-1 text-[10px] font-semibold hover:bg-grid-hover justify-center text-center leading-tight"
+                      >
+                        {format(selectedDate, 'MMM dd')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={date => {
+                          if (date) {
+                            setSelectedDate(date);
+                            setIsDatePickerOpen(false);
+                          }
+                        }}
+                        initialFocus
+                        className={cn('p-3 pointer-events-auto')}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 {filteredRooms.map(room => (
                   <div
                     key={room.id}
                     className="bg-grid-header border border-gray-400 p-2 text-center font-medium text-sm sticky top-0 z-20 relative shadow-sm rounded-sm"
-                    style={{ width: 100, minWidth: 100, maxWidth: 100 }}
+                    style={{ width: 90, minWidth: 90, maxWidth: 90 }}
                   >
                     <div className="flex flex-col items-center space-y-1">
                       <div className="font-semibold text-sm w-full text-center whitespace-nowrap">{room.name}</div>

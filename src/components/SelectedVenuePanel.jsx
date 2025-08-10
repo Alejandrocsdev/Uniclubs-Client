@@ -154,11 +154,17 @@ const SelectedVenuePanel = ({
                       <span
                         className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           book.userLevel === 'advanced'
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-blue-500 text-white'
+                            ? 'bg-booking-advanced text-white'
+                            : book.userLevel === 'intermediate'
+                            ? 'bg-booking-intermediate text-white'
+                            : 'bg-booking-beginner text-white'
                         }`}
                       >
-                        {book.userLevel === 'advanced' ? 'Advanced' : 'Beginner'}
+                        {book.userLevel === 'advanced' 
+                          ? 'Advanced' 
+                          : book.userLevel === 'intermediate'
+                          ? 'Intermediate'
+                          : 'Beginner'}
                       </span>
                       <span className="text-base font-medium flex items-center gap-2">
                         {book.bookedBy === user?.username ? (
