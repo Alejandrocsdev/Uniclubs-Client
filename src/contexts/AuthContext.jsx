@@ -72,19 +72,19 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Optionally call logout API
+      // Optionally call sign out API
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Sign out error:', error);
     } finally {
       setUser(null);
     }
   };
 
-  // Development mock login function
+  // Development mock sign in function
   const mockLogin = () => {
     const mockUser = {
       id: 2,
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
     setUser(mockUser);
   };
 
-  // Set redirect path for after login
+  // Set redirect path for after sign in
   const setLoginRedirect = (path) => {
     setRedirectPath(path);
   };

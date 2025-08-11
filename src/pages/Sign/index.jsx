@@ -36,7 +36,7 @@ function Sign() {
     await api(axiosPrivate.post('/api/auth/sign-in', formData), {
       onSuccess: async () => {
         setSucMsg('Sign in successfully. Redirecting...');
-        console.log('Login successful, fetching user data...');
+        console.log('Sign in successful, fetching user data...');
         
         try {
           // Refresh user data from the server
@@ -51,8 +51,8 @@ function Sign() {
           console.log('Redirecting to:', redirectTo);
           navigate(redirectTo);
         } catch (error) {
-          console.error('Failed to fetch user data after login:', error);
-          // Even if refetch fails, still navigate since login was successful
+          console.error('Failed to fetch user data after sign in:', error);
+          // Even if refetch fails, still navigate since sign in was successful
           setTimeout(() => {
             navigate('/booking');
           }, 500);
@@ -102,58 +102,57 @@ function Sign() {
   };
 
   return (
-    <Card title={isSignIn ? 'Sign In' : 'Sign Up'}>
-      <Form
-        extra={setFormExtra}
-        schema={isSignIn ? signInSchema : signUpSchema}
-        onSubmit={isSignIn ? onSignIn : onSignUp}
-      >
-        {/* Username */}
-        <Input name="username" placeholder="Username" maxLength={16} />
+    <div className={S.page}>
+      <div className={S.bg} aria-hidden />
+      <div className={S.shell}>
+        <Card title={isSignIn ? 'Sign In' : 'Sign Up'} className="text-white">
+          <Form
+            extra={setFormExtra}
+            schema={isSignIn ? signInSchema : signUpSchema}
+            onSubmit={isSignIn ? onSignIn : onSignUp}
+          >
+            {/* Username */}
+            <Input name="username" placeholder="Username" maxLength={16} />
+  
+            {/* Password */}
+            <Input name="password" placeholder="Password" maxLength={16} />
+  
+            {/* Confirm Password */}
+            {!isSignIn && (
+              <Input name="rePassword" placeholder="Repeat password" maxLength={16} />
+            )}
+  
+            {/* Email */}
+            {!isSignIn && <Input name="email" placeholder="Email" maxLength={254} />}
+  
+            {/* OTP */}
+            {!isSignIn && <OtpInput name="otp" />}
+  
+            {/* Submit */}
+            <Submit loaderSize={10} isSubmitting={isSubmitting}>
+              {isSignIn ? 'Sign In' : 'Sign Up'}
+            </Submit>
+  
+            {/* Reset Password */}
+            {isSignIn && (
+              <Anchor style={S.recoverLink} int="/recovery/password">
+                Forgot password?
+              </Anchor>
+            )}
 
-        {/* Password */}
-        <Input name="password" placeholder="Password" maxLength={16} />
-
-        {/* Confirm Password */}
-        {!isSignIn && (
-          <Input
-            name="rePassword"
-            placeholder="Repeat password"
-            maxLength={16}
-          />
-        )}
-
-        {/* Email */}
-        {!isSignIn && (
-          <Input name="email" placeholder="Email" maxLength={254} />
-        )}
-
-        {/* OTP */}
-        {!isSignIn && <OtpInput name="otp" />}
-
-        {/* Reset Password */}
-        {isSignIn && (
-          <Anchor style={S.recoverLink} int="/recovery/password">
-            Forgot password?
-          </Anchor>
-        )}
-
-        {/* Submit */}
-        <Submit loaderSize={10} isSubmitting={isSubmitting}>
-          {isSignIn ? 'Sign In' : 'Sign Up'}
-        </Submit>
-
-        {/* Switch */}
-        <div className={S.switch}>
-          <span className={S.switchText}>
-            {isSignIn ? 'New to Uniclubs?' : 'Already have an account?'}
-          </span>
-          <Anchor style={S.switchLink} int={isSignIn ? '/sign-up' : '/sign-in'}>
-            {isSignIn ? 'Sign Up' : 'Sign In'}
-          </Anchor>
-        </div>
-      </Form>
-    </Card>
+            {/* Switch */}
+            <div className={S.switch}>
+              <span className={S.switchText}>
+                {isSignIn ? 'New to GameCh?' : 'Already have an account?'}
+              </span>
+              <Anchor style={S.switchLink} int={isSignIn ? '/sign-up' : '/sign-in'}>
+                {isSignIn ? 'Sign Up' : 'Sign In'}
+              </Anchor>
+            </div>
+          </Form>
+        </Card>
+      </div>
+    </div>
   );
 }
 

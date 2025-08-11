@@ -11,7 +11,6 @@ import { useLoader } from './hooks';
 import Error from './components/Error';
 import Message from './components/Message';
 // Layout
-import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
 // Laoder
 import ScreenLoader from './loaders/ScreenLoader';
@@ -20,6 +19,7 @@ import Protected from './routes/Protected';
 // Public Pages
 import Sign from './pages/Sign';
 import Recovery from './pages/Recovery';
+import LandingPage from './pages/LandingPage';
 // Private Pages
 import Home from './pages/Home';
 import Booking from './pages/Booking';
@@ -41,19 +41,18 @@ function App() {
           <Message />
 
           <Routes>
-            {/* Public Routes */}
-            <Route element={<AuthLayout />}>
+            {/* Landing Page - Public Route */}
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/sign-in" element={<Sign />} />
               <Route path="/sign-up" element={<Sign />} />
               <Route path="/recovery/password" element={<Recovery />} />
               <Route path="/recovery/username" element={<Recovery />} />
-
             </Route>
 
             <Route element={<MainLayout />}>
               <Route path="/dev/booking" element={<Booking />} />
               <Route path="/member-management" element={<MemberManagement />} />
-
             </Route>
 
             {/* Private Routes */}
@@ -63,7 +62,7 @@ function App() {
               }
             >
               <Route element={<MainLayout />}>
-                <Route index element={<Home />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/booking" element={<Booking />} />
                 {/* <Route path="/member-management" element={<MemberManagement />} /> */}
                 <Route path="/components" element={<Components />} />

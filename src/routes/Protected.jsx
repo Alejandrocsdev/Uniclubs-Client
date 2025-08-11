@@ -37,7 +37,7 @@ const Protected = ({ allowedRoles }) => {
           onError: () => {
             setState('invalid');
             clearAuth();
-            // Remember the current path for redirect after login
+            // Remember the current path for redirect after sign in
             setLoginRedirect(location.pathname);
           },
         });

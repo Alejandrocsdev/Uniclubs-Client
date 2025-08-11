@@ -1,16 +1,80 @@
-.switch {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: hsl(210, 100%, 45%);
-  text-align: left;
-  display: block;
-  cursor: pointer;
+/* Page background + center layout (purple gradient, matching Sign & landing) */
+.page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #0b0b12;
+  overflow: hidden;
+}
 
-  @media (max-width: 40rem) {
-    font-size: 0.7rem;
+/* Soft blurry gradient glow */
+.bg {
+  position: absolute;
+  inset: -15%;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(147, 51, 234, 0.28), transparent 55%),
+    radial-gradient(1000px 520px at 90% 0%, rgba(236, 72, 153, 0.25), transparent 55%),
+    radial-gradient(900px 480px at 60% 110%, rgba(59, 130, 246, 0.22), transparent 60%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Recovery card container */
+.shell {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  z-index: 1;
+  backdrop-filter: saturate(120%);
+}
+
+.shell > * {
+  border-radius: 24px !important;
+  background: rgba(17, 17, 23, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03) !important;
+}
+
+.shell :global(form) {
+  padding: 24px;
+}
+@media (min-width: 640px) {
+  .shell :global(form) {
+    padding: 28px;
   }
 }
 
-.switch:hover {
-  color: hsl(210, 100%, 65%);
+/* Inputs & OTP styling */
+.shell :global(input),
+.shell :global(.otp-input) {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
+.shell :global(input:focus),
+.shell :global(.otp-input:focus) {
+  outline: none;
+  border-color: #c084fc;
+  box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.15);
+}
+
+/* Submit button – gradient like Sign CTA */
+.shell :global(button[type="submit"]) {
+  background: linear-gradient(90deg, #7c3aed, #db2777, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+}
+
+/* Recovery specific link (Forgot username/password) */
+.recoverLink {
+  display: inline-block;
+  color: #c4b5fd;
+  font-size: 0.875rem;
+  transition: color 0.2s ease-in-out;
+}
+.recoverLink:hover { color: #ddd6fe; }

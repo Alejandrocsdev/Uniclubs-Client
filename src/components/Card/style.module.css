@@ -31,15 +31,43 @@
   }
 }
 
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  min-height: 2.5rem;
+
+  @media (max-width: 40rem) {
+    margin-bottom: 1.5rem;
+    min-height: 2rem;
+  }
+}
+
+.iconContainer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.titleContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cardContent {
+  width: 100%;
+}
+
 .previous {
   font-size: 1.8rem;
-  position: absolute;
-  left: 1.6rem;
   cursor: pointer;
+  color: white;
 
   @media (max-width: 40rem) {
     font-size: 1.4rem;
-    left: 1.1rem;
   }
 }
 
@@ -48,12 +76,15 @@
 }
 
 .cardTitle {
-  margin-bottom: 2rem;
+  color: #fff;
+  margin: 0;
   font-size: 1.8rem;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   @media (max-width: 40rem) {
     font-size: 1.4rem;
-    margin-bottom: 1.5rem;
   }
 }
