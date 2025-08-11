@@ -52,6 +52,20 @@ function generateTimeSlots(start = '08:00', end = '22:00', interval = 20) {
   return slots;
 }
 
+// 生成可选择的时间选项（每20分钟一个）
+function generateTimeOptions() {
+  const options = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 20) {
+      const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      options.push(timeStr);
+    }
+  }
+  return options;
+}
+
+const timeOptions = generateTimeOptions();
+
 export const timeSlots = generateTimeSlots();
 
 const todayStr = new Date().toISOString().slice(0, 10);
@@ -210,6 +224,11 @@ const BookingTable = ({
   const [showNotification, setShowNotification] = useState(null);
   const [showConflictConfirm, setShowConflictConfirm] = useState(null);
   const [isControlPanelCollapsed, setIsControlPanelCollapsed] = useState(false);
+  
+  // 新增：时间设置状态
+  const [startTime, setStartTime] = useState('08:00');
+  const [endTime, setEndTime] = useState('22:00');
+  const [currentTimeSlots, setCurrentTimeSlots] = useState(generateTimeSlots('08:00', '22:00'));
 
   // 新增：滚动监听相关状态
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -276,87 +295,108 @@ const BookingTable = ({
   }, [isEditMode, onEditModeChange]);
 
   // 新增：滚动监听 useEffect
-  useEffect(() => {
-    let ticking = false;
+  // useEffect(() => {
+  //   let ticking = false;
     
-    // 触摸事件处理
-    const handleTouchStart = () => {
-      isTouching.current = true;
-    };
+  //   // 触摸事件处理
+  //   const handleTouchStart = () => {
+  //     isTouching.current = true;
+  //   };
     
-    const handleTouchEnd = () => {
-      // 延迟重置触摸状态，因为滚动可能在触摸结束后继续
-      setTimeout(() => {
-        isTouching.current = false;
-      }, 150);
-    };
+  //   const handleTouchEnd = () => {
+  //     // 延迟重置触摸状态，因为滚动可能在触摸结束后继续
+  //     setTimeout(() => {
+  //       isTouching.current = false;
+  //     }, 150);
+  //   };
     
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
+  //   const handleScroll = () => {
+  //     if (!ticking) {
+  //       requestAnimationFrame(() => {
+  //         const currentScrollY = window.scrollY;
           
-          // 防止在状态更新期间或手动切换期间处理滚动事件
-          if (isScrolling.current || manualToggle.current) {
-            ticking = false;
-            return;
-          }
+  //         // 防止在状态更新期间或手动切换期间处理滚动事件
+  //         if (isScrolling.current || manualToggle.current) {
+  //           ticking = false;
+  //           return;
+  //         }
           
-          // 在触摸设备上，只有在非触摸滚动时才自动折叠
-          // 这样可以避免在用户主动滚动时的奇怪行为
-          const isTouch = isTouchDevice();
-          if (isTouch && isTouching.current) {
-            ticking = false;
-            return;
-          }
+  //         // 在触摸设备上，只有在非触摸滚动时才自动折叠
+  //         // 这样可以避免在用户主动滚动时的奇怪行为
+  //         const isTouch = isTouchDevice();
+  //         if (isTouch && isTouching.current) {
+  //           ticking = false;
+  //           return;
+  //         }
           
-          // 移动设备使用更大的阈值
-          const isMobile = window.innerWidth <= 768;
-          const scrollThreshold = isMobile ? 50 : 10; // 进一步增加移动设备阈值
+  //         // 移动设备使用更大的阈值
+  //         const isMobile = window.innerWidth <= 768;
+  //         const scrollThreshold = isMobile ? 50 : 10; // 进一步增加移动设备阈值
           
-          if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
-            const direction = currentScrollY > lastScrollY ? 'down' : 'up';
+  //         if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
+  //           const direction = currentScrollY > lastScrollY ? 'down' : 'up';
             
-            if (direction !== scrollDirection) {
-              isScrolling.current = true;
+  //           if (direction !== scrollDirection) {
+  //             isScrolling.current = true;
               
-              setScrollDirection(direction);
+  //             setScrollDirection(direction);
               
-              // 根据滚动方向自动展开/收起控制面板
-              if (direction === 'down') {
-                setIsControlPanelCollapsed(true);
-              } else if (direction === 'up') {
-                setIsControlPanelCollapsed(false);
-              }
+  //             // 根据滚动方向自动展开/收起控制面板
+  //             if (direction === 'down') {
+  //               setIsControlPanelCollapsed(true);
+  //             } else if (direction === 'up') {
+  //               setIsControlPanelCollapsed(false);
+  //             }
               
-              // 移动设备使用更长的延迟
-              const delay = isMobile ? 500 : 100;
-              setTimeout(() => {
-                isScrolling.current = false;
-              }, delay);
-            }
+  //             // 移动设备使用更长的延迟
+  //             const delay = isMobile ? 500 : 100;
+  //             setTimeout(() => {
+  //               isScrolling.current = false;
+  //             }, delay);
+  //           }
             
-            setLastScrollY(currentScrollY);
-          }
+  //           setLastScrollY(currentScrollY);
+  //         }
           
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
+  //         ticking = false;
+  //       });
+  //       ticking = true;
+  //     }
+  //   };
 
-    // 添加事件监听器
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('touchend', handleTouchEnd, { passive: true });
+  //   // 添加事件监听器
+  //   window.addEventListener('scroll', handleScroll, { passive: true });
+  //   window.addEventListener('touchstart', handleTouchStart, { passive: true });
+  //   window.addEventListener('touchend', handleTouchEnd, { passive: true });
     
-    // 清理函数
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [lastScrollY, scrollDirection]);
+  //   // 清理函数
+  //   return () => {
+  //     window.removeEventListener('scroll', handleScroll);
+  //     window.removeEventListener('touchstart', handleTouchStart);
+  //     window.removeEventListener('touchend', handleTouchEnd);
+  //   };
+  // }, [lastScrollY, scrollDirection]);
+
+  // 新增：动态生成时间段的 useEffect
+  useEffect(() => {
+    // 验证结束时间是否晚于开始时间
+    const [startHour, startMin] = startTime.split(':').map(Number);
+    const [endHour, endMin] = endTime.split(':').map(Number);
+    const startMins = startHour * 60 + startMin;
+    const endMins = endHour * 60 + endMin;
+    
+    if (endMins > startMins) {
+      const newTimeSlots = generateTimeSlots(startTime, endTime);
+      setCurrentTimeSlots(newTimeSlots);
+    } else {
+      // 如果结束时间不合法，显示通知
+      setShowNotification({
+        type: 'error',
+        message: 'End time must be later than start time'
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+    }
+  }, [startTime, endTime]);
 
   // 新增：用於滾動到當前時間
   const tableScrollRef = useRef(null);
@@ -370,7 +410,7 @@ const BookingTable = ({
     // 找到最接近的 timeSlot index
     let closestIdx = 0;
     let minDiff = Infinity;
-    timeSlots.forEach((slot, idx) => {
+    currentTimeSlots.forEach((slot, idx) => {
       const [h, m] = slot.split(':').map(Number);
       const slotMins = h * 60 + m;
       const [nh, nm] = nowStr.split(':').map(Number);
@@ -393,7 +433,7 @@ const BookingTable = ({
         container.scrollLeft = header.offsetLeft - 120; // 120 為左側欄寬
       }
     }
-  }, [isHorizontalTime]);
+  }, [isHorizontalTime, currentTimeSlots]);
 
   const getBookingStatus = (roomId, timeSlot) => {
     const dateStr = selectedDate
@@ -432,7 +472,7 @@ const BookingTable = ({
     if (filter === 'all') return true;
 
     // Check if any time slot for this room matches the filter
-    return timeSlots.some(timeSlot => {
+    return currentTimeSlots.some(timeSlot => {
       const status = getRoomStatus(roomId, timeSlot);
       return status === filter;
     });
@@ -896,86 +936,168 @@ const BookingTable = ({
           {isEditMode ? 'Exit Edit' : 'Edit Mode'}
         </Button>
       </div>
-      <Card className="p-4 shadow-lg border-0">
+      <Card className="p-4 pb-2 shadow-lg border-0">
         <div className="flex flex-col ">
+          {/* 始终可见的核心控制选项 */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:justify-between sm:items-center">
+            {/* 左侧：Players 和 Level 选择器 */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <User className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Players" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Player</SelectItem>
+                  <SelectItem value="2">2 Players</SelectItem>
+                  <SelectItem value="3">3 Players</SelectItem>
+                  <SelectItem value="4">4 Players</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
+                <SelectTrigger className="w-full sm:w-[170px]">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="beginner"
+                    className="flex items-center gap-2"
+                  >
+                    <div className="flex flex-row space-x-2">
+                      <div className="w-4 h-4 bg-booking-beginner border border-grid-border rounded-full" />
+                      <span>Beginner</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value="intermediate"
+                    className="flex items-center gap-2"
+                  >
+                    <div className="flex flex-row space-x-2">
+                      <div className="w-4 h-4 bg-booking-intermediate border border-grid-border rounded-full" />
+                      <span>Intermediate</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem
+                    value="advanced"
+                    className="flex items-center gap-2"
+                  >
+                    <div className="flex flex-row space-x-2">
+                      <div className="w-4 h-4 bg-booking-advanced border border-grid-border rounded-full" />
+                      <span>Advanced</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 右侧：Filter 选择器 */}
+            <div className={`flex justify-end ${
+              isControlPanelCollapsed ? 'hidden lg:flex' : 'flex'
+            }`}>
+              <Select value={filter} onValueChange={value => setFilter(value)}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Rooms</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="partial">Open to Join</SelectItem>
+                  <SelectItem value="full">Full</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           {/* 可折叠的内容区域 */}
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
             isControlPanelCollapsed ? 'max-h-0' : 'max-h-96'
           }`}>
             <div className="space-y-4">
-              {/* 第一排：控制选项 */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
-                    <SelectTrigger className="w-full sm:w-[140px]">
-                      <User className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Players" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 Player</SelectItem>
-                      <SelectItem value="2">2 Players</SelectItem>
-                      <SelectItem value="3">3 Players</SelectItem>
-                      <SelectItem value="4">4 Players</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* 时间设置 - 只在编辑模式下显示 */}
+              {isEditMode && (
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-foreground min-w-[80px]">Opening Hours:</span>
+                      <Select value={startTime} onValueChange={setStartTime}>
+                        <SelectTrigger className="w-full sm:w-[100px]">
+                          <SelectValue placeholder="Start" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {timeOptions.map(time => (
+                            <SelectItem key={`start-${time}`} value={time}>
+                              {time}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="text-sm text-muted-foreground">to</span>
+                      <Select value={endTime} onValueChange={setEndTime}>
+                        <SelectTrigger className="w-full sm:w-[100px]">
+                          <SelectValue placeholder="End" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {timeOptions.filter(time => {
+                            const [startHour, startMin] = startTime.split(':').map(Number);
+                            const [timeHour, timeMin] = time.split(':').map(Number);
+                            const startMins = startHour * 60 + startMin;
+                            const timeMins = timeHour * 60 + timeMin;
+                            return timeMins > startMins;
+                          }).map(time => (
+                            <SelectItem key={`end-${time}`} value={time}>
+                              {time}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-                  <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
-                    <SelectTrigger className="w-full sm:w-[170px]">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        value="beginner"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex flex-row space-x-2">
-                          <div className="w-4 h-4 bg-booking-beginner border border-grid-border rounded-full" />
-                          <span>Beginner</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="intermediate"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex flex-row space-x-2">
-                          <div className="w-4 h-4 bg-booking-intermediate border border-grid-border rounded-full" />
-                          <span>Intermediate</span>
-                        </div>
-                      </SelectItem>
-                      <SelectItem
-                        value="advanced"
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex flex-row space-x-2">
-                          <div className="w-4 h-4 bg-booking-advanced border border-grid-border rounded-full" />
-                          <span>Advanced</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-card rounded"
+                            style={{ border: '1px solid rgb(149, 155, 167)' }}
+                        ></div>
+                        <span>Available</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-user rounded"></div>
+                        <span>My Booking</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-partial rounded"></div>
+                        <span>Open to Join</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-occupied rounded"></div>
+                        <span>Full</span>
+                      </div>
+                  
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-beginner rounded-full"></div>
+                        <span>Beginner</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-intermediate rounded-full"></div>
+                        <span>Intermediate</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-booking-advanced rounded-full"></div>
+                        <span>Advanced</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              )}
 
-                  {/* Filter */}
-                  <Select value={filter} onValueChange={value => setFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-[140px]">
-                      <Filter className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Rooms</SelectItem>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="partial">Open to Join</SelectItem>
-                      <SelectItem value="full">Full</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                </div>
-              </div>
-
-              <div className="flex justify-end">
+              {/* 图例 - 始终显示 */}
+              {!isEditMode && (
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
                     <div className="flex items-center gap-2">
@@ -1013,7 +1135,7 @@ const BookingTable = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
             {/* 折叠控制按钮 */}
@@ -1022,12 +1144,8 @@ const BookingTable = ({
               variant="ghost"
               size="sm"
               onClick={handleManualToggle}
-              className={`${isControlPanelCollapsed ? 'h-8 px-3' : 'h-8 w-8'} p-0 transition-transform duration-200`}
+              className={`h-6 w-8 p-0 transition-transform duration-200`}
             >
-            
-              {isControlPanelCollapsed && (
-                <span className="text-sm font-medium mr-2">Show Controls</span>
-              )}
               <ChevronUp 
                 className={`h-4 w-4 transition-transform duration-200 ${
                   isControlPanelCollapsed ? 'rotate-180' : ''
@@ -1050,7 +1168,7 @@ const BookingTable = ({
               <div
                 className="grid gap-0.5"
                 style={{
-                  gridTemplateColumns: `${isEditMode ? '140px' : '80px'} repeat(${timeSlots.length}, 70px)`,
+                  gridTemplateColumns: `${isEditMode ? '140px' : '80px'} repeat(${currentTimeSlots.length}, 70px)`,
                 }}
               >
                 {/* Header row */}
@@ -1088,7 +1206,7 @@ const BookingTable = ({
                     </PopoverContent>
                   </Popover>
                 </div>
-                {timeSlots.map((time, idx) => (
+                {currentTimeSlots.map((time, idx) => (
                   <div
                     key={time}
                     ref={el => (timeHeaderRefs.current[idx] = el)}
@@ -1145,7 +1263,7 @@ const BookingTable = ({
                         </div>
                       </div>
                     </div>,
-                    ...timeSlots.map(time => renderCell(room.id, time)),
+                    ...currentTimeSlots.map(time => renderCell(room.id, time)),
                   ])
                   .flat()}
               </div>
@@ -1229,7 +1347,7 @@ const BookingTable = ({
                   </div>
                 ))}
                 {/* Data rows */}
-                {timeSlots
+                {currentTimeSlots
                   .map(time => [
                     <div
                       key={`${time}-header`}

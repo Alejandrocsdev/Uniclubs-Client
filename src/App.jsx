@@ -24,6 +24,7 @@ import Recovery from './pages/Recovery';
 import Home from './pages/Home';
 import Booking from './pages/Booking';
 import Components from './pages/Components';
+import MemberManagement from './pages/MemberManagement';
 
 function App() {
   const { loading, error } = useLoader();
@@ -51,6 +52,8 @@ function App() {
 
             <Route element={<MainLayout />}>
               <Route path="/dev/booking" element={<Booking />} />
+              <Route path="/member-management" element={<MemberManagement />} />
+
             </Route>
 
             {/* Private Routes */}
@@ -62,6 +65,7 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route index element={<Home />} />
                 <Route path="/booking" element={<Booking />} />
+                {/* <Route path="/member-management" element={<MemberManagement />} /> */}
                 <Route path="/components" element={<Components />} />
               </Route>
             </Route>

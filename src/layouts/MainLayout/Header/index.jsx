@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
-import { User, LogOut, Settings, UserCircle, LogIn } from 'lucide-react';
+import { User, LogOut, Settings, UserCircle, LogIn, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 function Header() {
@@ -74,6 +74,10 @@ function Header() {
     toast.info('Profile page coming soon');
   };
 
+  const handleMemberManagement = () => {
+    navigate('/member-management');
+  };
+
   const handleSettings = () => {
     // Navigate to settings page when available
     toast.info('Settings page coming soon');
@@ -92,7 +96,7 @@ function Header() {
             Gamech
           </h1>
         </div>
-
+        
         <div className="flex items-center">
           {loading ? (
             <div className="h-10 w-20 bg-gray-200 rounded-md animate-pulse"></div>
@@ -136,6 +140,10 @@ function Header() {
                 <DropdownMenuItem onClick={handleProfile}>
                   <UserCircle className="mr-2 h-4 w-4" />
                   <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleMemberManagement}>
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>Member Management</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSettings}>
                   <Settings className="mr-2 h-4 w-4" />
