@@ -1,21 +1,28 @@
 // Libraries
 import axios from 'axios';
+
 // Custom Functions
 import { store } from '../redux/store.js';
 import { setCredentials, clearCredentials } from '../redux/authSlice.js';
+
 // Utilities
 import { serverUrl, devLog, devErr } from '../utils';
 
 // Public
 export const axiosPublic = axios.create({ baseURL: serverUrl });
+
 // Private
 export const axiosPrivate = axios.create({
   baseURL: serverUrl,
-  withCredentials: true,
+  withCredentials: true
 });
+
 // Refresh Token
-const refreshToken = () =>
-  axios.post(`${serverUrl}/api/auth/refresh`, {}, { withCredentials: true });
+const refreshToken = () => axios.post(
+  `${serverUrl}/api/auth/refresh`,
+  {},
+  { withCredentials: true }
+);
 
 // Request Interceptor
 axiosPrivate.interceptors.request.use(
