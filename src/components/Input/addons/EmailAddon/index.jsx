@@ -1,65 +1,62 @@
 // CSS Module
-import S from './style.module.css';
+import S from './style.module.css'
 // Libraries
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useFormContext, useWatch } from 'react-hook-form';
+import { useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { useFormContext, useWatch } from 'react-hook-form'
 // Custom Functions
-import { useCountDown } from '../../../../hooks';
-import { api, axiosPublic } from '../../../../api';
-import { useMessage } from '../../../../contexts/MessageContext';
+import { useCountDown } from '../../../../hooks'
+import { api, axiosPublic } from '../../../../api'
+import { useMessage } from '../../../../contexts/MessageContext'
 // Components
-import Submit from '../../../Submit';
+import Submit from '../../../Submit'
 
 function EmailAddon() {
-  const { count, isCounting, startCountdown } = useCountDown(60);
-  const { setSucMsg, setErrMsg } = useMessage();
-  const { pathname } = useLocation();
+  const { count, isCounting, startCountdown } = useCountDown(60)
+  const { setSucMsg, setErrMsg } = useMessage()
+  const { pathname } = useLocation()
   const {
-    formState: { errors },
-  } = useFormContext();
+    formState: { errors }
+  } = useFormContext()
 
   const getPurpose = () => {
-    if (pathname === '/sign-up') return 'sign-up';
-    if (pathname === '/recovery/password') return 'pwd-reset';
-    if (pathname === '/recovery/username') return 'usr-recover';
-    return '';
-  };
+    if (pathname === '/sign-up') return 'sign-up'
+    if (pathname === '/recovery/password') return 'reset-password'
+    if (pathname === '/recovery/username') return 'recover-username'
+    return ''
+  }
 
-  const email = useWatch({ name: 'email' });
-  const hasError = !!errors.email;
+  const email = useWatch({ name: 'email' })
+  const hasError = !!errors.email
 
-  const isDisabled = !email || hasError || isCounting;
+  const isDisabled = !email || hasError || isCounting
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const onEmailOtp = async () => {
-    if (isDisabled || isSubmitting) return;
+    if (isDisabled || isSubmitting) return
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
-    await api(
-      axiosPublic.post('/api/auth/email/otp', { email, purpose: getPurpose() }),
-      {
-        onSuccess: () => {
-          setSucMsg('OTP sent successfully.');
-        },
-        onError: () => {
-          setErrMsg('Something went wrong. Please try again.');
-        },
-        onFinally: () => {
-          setIsSubmitting(false);
-          startCountdown();
-        },
+    await api(axiosPublic.post('/api/auth/email-otp', { email, purpose: getPurpose() }), {
+      onSuccess: () => {
+        setSucMsg('OTP sent successfully.')
+      },
+      onError: () => {
+        setErrMsg('Something went wrong. Please try again.')
+      },
+      onFinally: () => {
+        setIsSubmitting(false)
+        startCountdown()
       }
-    );
-  };
+    })
+  }
 
   const getButtonText = () => {
-    if (isCounting) return `${count}s`;
-    if (count === 0) return 'Resend OTP';
-    return 'Send OTP';
-  };
+    if (isCounting) return `${count}s`
+    if (count === 0) return 'Resend OTP'
+    return 'Send OTP'
+  }
 
   return (
     <Submit
@@ -71,7 +68,7 @@ function EmailAddon() {
     >
       {getButtonText()}
     </Submit>
-  );
+  )
 }
 
 export default EmailAddon;

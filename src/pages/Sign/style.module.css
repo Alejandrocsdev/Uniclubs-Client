@@ -24,8 +24,6 @@
 /* Constrain the auth card */
 .shell {
   position: relative;
-  width: 100%;
-  max-width: 480px;
   z-index: 1;
   backdrop-filter: saturate(120%);
 }
