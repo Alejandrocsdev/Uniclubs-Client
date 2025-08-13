@@ -223,7 +223,7 @@ const BookingTable = ({
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(null);
   const [showConflictConfirm, setShowConflictConfirm] = useState(null);
-  const [isControlPanelCollapsed, setIsControlPanelCollapsed] = useState(false);
+  const [isControlPanelCollapsed, setIsControlPanelCollapsed] = useState(true);
   
   // 新增：时间设置状态
   const [startTime, setStartTime] = useState('08:00');
@@ -918,45 +918,60 @@ const BookingTable = ({
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-foreground">Booking Table</h2>
+      <div className="fixed bottom-6 right-6 z-50">
         <Button
-          variant={isEditMode ? "default" : "outline"}
+          variant={isEditMode ? "outline":"default"}
           onClick={() => setIsEditMode(!isEditMode)}
           className={`flex items-center font-semibold py-2 px-4 text-base shadow-lg transition-all duration-200 ${
             isEditMode 
-              ? 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500' 
-              : 'border-2 border-orange-500 text-orange-600 hover:bg-orange-50'
+              ? 'border-2 border-blue-500 text-blue-600 hover:bg-blue-50'
+              : 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500'
           }`}
           size="lg"
         >
-          <Settings className="mr-2 h-5 w-5" />
-          {isEditMode ? 'Exit Edit' : 'Edit Mode'}
+          <Settings className=" h-5 w-5" />
+          {/* {isEditMode ? 'Exit Edit' : 'Edit Mode'} */}
         </Button>
       </div>
-      <Card className="p-4 pb-2 shadow-lg border-0">
+      <Card className="p-4 mb-2 shadow-lg border-0">
         <div className="flex flex-col ">
           {/* 始终可见的核心控制选项 */}
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:justify-between sm:items-center">
+          <div className={`flex ${
+            isControlPanelCollapsed 
+              ? 'flex-row gap-2 sm:gap-3 justify-between items-center' 
+              : 'flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-between sm:items-center'
+          }`}>
             {/* 左侧：Players 和 Level 选择器 */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className={`flex ${
+              isControlPanelCollapsed 
+                ? 'flex-row gap-2' 
+                : 'flex-col sm:flex-row gap-2 sm:gap-3'
+            }`}>
               <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
+                <SelectTrigger className={
+                  isControlPanelCollapsed 
+                    ? 'w-[90px]' 
+                    : 'w-full sm:w-[140px]'
+                }>
                   <User className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Players" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">1 Player</SelectItem>
-                  <SelectItem value="2">2 Players</SelectItem>
-                  <SelectItem value="3">3 Players</SelectItem>
-                  <SelectItem value="4">4 Players</SelectItem>
+                  <SelectItem value="1">{isControlPanelCollapsed ? "1" : "1 Player"}</SelectItem>
+                  <SelectItem value="2">{isControlPanelCollapsed ? "2" : "2 Players"}</SelectItem>
+                  <SelectItem value="3">{isControlPanelCollapsed ? "3" : "3 Players"}</SelectItem>
+                  <SelectItem value="4">{isControlPanelCollapsed ? "4" : "4 Players"}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
-                <SelectTrigger className="w-full sm:w-[170px]">
+                <SelectTrigger className={
+                  isControlPanelCollapsed 
+                    ? 'w-[180px]' 
+                    : 'w-full sm:w-[180px]'
+                }>
                   <Settings className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
@@ -992,28 +1007,43 @@ const BookingTable = ({
               </Select>
             </div>
 
-            {/* 右侧：Filter 选择器 */}
-            <div className={`flex justify-end ${
-              isControlPanelCollapsed ? 'hidden lg:flex' : 'flex'
-            }`}>
-              <Select value={filter} onValueChange={value => setFilter(value)}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Rooms</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="partial">Open to Join</SelectItem>
-                  <SelectItem value="full">Full</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* 右侧：Filter 选择器和折叠按钮 */}
+            <div className="flex items-center gap-2">
+              {/* Filter 选择器 - 只在未折叠时显示 */}
+              {!isControlPanelCollapsed && (
+                <Select value={filter} onValueChange={value => setFilter(value)}>
+                  <SelectTrigger className="w-full sm:w-[140px]">
+                    <Filter className="mr-2 h-4 w-4" />
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Rooms</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="partial">Open to Join</SelectItem>
+                    <SelectItem value="full">Full</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+              
+              {/* 折叠控制按钮 - 移动到这里使其与选择器在同一行 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleManualToggle}
+                className="h-8 w-8 p-0 transition-transform duration-200 flex-shrink-0"
+              >
+                <ChevronUp 
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    isControlPanelCollapsed ? 'rotate-180' : ''
+                  }`} 
+                />
+              </Button>
             </div>
           </div>
 
           {/* 可折叠的内容区域 */}
           <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            isControlPanelCollapsed ? 'max-h-0' : 'max-h-96'
+            isControlPanelCollapsed ? 'max-h-0' : 'max-h-96  mt-2'
           }`}>
             <div className="space-y-4">
               {/* 时间设置 - 只在编辑模式下显示 */}
@@ -1138,26 +1168,11 @@ const BookingTable = ({
               )}
             </div>
           </div>
-            {/* 折叠控制按钮 */}
-          <div className="flex items-center justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleManualToggle}
-              className={`h-6 w-8 p-0 transition-transform duration-200`}
-            >
-              <ChevronUp 
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isControlPanelCollapsed ? 'rotate-180' : ''
-                }`} 
-              />
-            </Button>
-          </div>
         </div>
       </Card>
 
       {/* Table */}
-      <Card className="overflow-hidden shadow-lg border-0">
+      <Card className="overflow-hidden shadow-lg mb-2 border-0">
         <div
           className="overflow-auto bg-white w-full"
           ref={tableScrollRef}
