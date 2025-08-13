@@ -19,12 +19,13 @@ function EmailAddon() {
     formState: { errors }
   } = useFormContext()
 
-  const getPurpose = () => {
-    if (pathname === '/sign-up') return 'sign-up'
-    if (pathname === '/recovery/password') return 'reset-password'
-    if (pathname === '/recovery/username') return 'recover-username'
-    return ''
-  }
+  const getPurpose = () => { 
+    if (pathname === '/user/sign-up') return 'sign-up:user'; 
+    if (pathname === '/admin/sign-up') return 'sign-up:admin'; 
+    if (pathname === '/recovery/password') return 'reset:password'; 
+    if (pathname === '/recovery/username') return 'recover:username'; 
+    return ''; 
+  };
 
   const email = useWatch({ name: 'email' })
   const hasError = !!errors.email
