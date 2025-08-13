@@ -1,5 +1,12 @@
 .container {
   min-height: 100dvh;
-  background: var(--primary-background);
+  background: black;
   padding-top: 4rem; /* 64px to account for fixed header */
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding-top: 4rem;
+    min-height: 100dvh;
+  }
 }

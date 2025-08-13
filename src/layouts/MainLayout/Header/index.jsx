@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 // Components
 import { Button } from '../../../components/ui/button';
+import { Sheet, SheetTrigger, SheetContent, SheetClose } from '../../../components/ui/sheet';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '../../../components/ui/avatar';
-import { User, LogOut, Settings, UserCircle, LogIn, Users } from 'lucide-react';
+import { User, LogOut, Settings, UserCircle, LogIn, Users, Menu } from 'lucide-react';
 import { toast } from 'sonner';
 
 function Header() {
@@ -93,11 +94,11 @@ function Header() {
       className="
         fixed top-0 left-0 right-0 z-50 w-full
         border-b border-white/10
-        bg-gradient-to-r from-purple-950/90 via-slate-950/90 to-purple-950/90
-        backdrop-blur-md
+        bg-slate-950
+        bg-gradient-to-r from-purple-950 via-slate-950 to-purple-950
       "
     >     
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand + Primary Nav */}
         <div className="flex items-center gap-6">
           <div
@@ -119,8 +120,8 @@ function Header() {
           </nav>
         </div>
 
-        {/* Right side: auth */}
-        <div className="flex items-center">
+        {/* Right side: auth (desktop) */}
+        <div className="hidden md:flex items-center">
           {loading ? (
             <div className="h-10 w-20 bg-white/10 rounded-md animate-pulse" />
           ) : !location.pathname.match(/^\/sign-(up|in)$/) && !location.pathname.match(/^\/recovery\/(password|username)$/) ? (
@@ -195,7 +196,7 @@ function Header() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 text-white border-white/20 hover:bg白色/10"
+                  className="flex items-center gap-2 text-white border-white/20 hover:bg-white/10"
                   onClick={handleTestApi}
                 >
                   <Settings className="h-4 w-4" />
@@ -212,6 +213,85 @@ function Header() {
               </Button>
             </div>
           )) : null}
+        </div>
+        
+        {/* Mobile menu trigger */}
+        <div className="md:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-slate-950 text-white border-l border-white/10">
+              <div className="mt-6 flex flex-col gap-3">
+                <SheetClose asChild>
+                  <button
+                    className="text-left text-base py-2 px-2 rounded hover:bg-white/10"
+                    onClick={() => { navigate('/'); setTimeout(() => document.getElementById('clubs')?.scrollIntoView({ behavior: 'smooth' }), 150); }}
+                  >
+                    Clubs
+                  </button>
+                </SheetClose>
+                <SheetClose asChild>
+                  <button
+                    className="text-left text-base py-2 px-2 rounded hover:bg-white/10"
+                    onClick={() => { navigate('/dev/booking') }}
+                  >
+                    Booking
+                    </button>
+                  </SheetClose>
+
+                <div className="h-px bg-white/10 my-2" />
+
+                {loading ? (
+                  <div className="h-10 w-full bg-white/10 rounded-md animate-pulse" />
+                ) : user ? (
+                  <>
+                    <div className="flex items-center gap-3 px-2 py-2">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback className="bg-purple-600 text-white text-sm font-semibold">
+                          {getUserInitials(user.username)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{user.username}</span>
+                        <span className="text-xs text-white/60">{user.email}</span>
+                      </div>
+                    </div>
+                    <SheetClose asChild>
+                      <button className="text-left text-base py-2 px-2 rounded hover:bg-white/10" onClick={handleMemberManagement}>
+                        Member Management
+                      </button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <button className="text-left text-base py-2 px-2 rounded hover:bg-white/10" onClick={handleSettings}>
+                        Settings
+                      </button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <button className="text-left text-base py-2 px-2 rounded hover:bg-white/10 text-red-400" onClick={handleLogout}>
+                        Sign out
+                      </button>
+                    </SheetClose>
+                  </>
+                ) : (
+                  <>
+                    <SheetClose asChild>
+                      <button
+                        className="text-left text-base py-2 px-2 rounded bg-purple-600 hover:bg-purple-700 text-white"
+                        onClick={handleLogin}
+                      >
+                        <div className="flex items-center gap-2">
+                          <LogIn className="h-4 w-4" /> Sign In
+                        </div>
+                      </button>
+                    </SheetClose>
+                  </>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

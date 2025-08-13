@@ -24,8 +24,11 @@ const Booking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="p-4 md:p-8 md:pt-4">
+    <div className="min-h-screen relative bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-blue-600/20" />
+      </div>
+      <div className="relative p-4 md:p-8 md:pt-4">
         <div className="max-w-full mx-auto">
           <BookingTable
             selectedCell={selectedCell}
@@ -37,17 +40,17 @@ const Booking = () => {
             isEditMode={isEditMode}
             onEditModeChange={setIsEditMode}
           />
-        </div>       
+        </div>
         <SelectedVenuePanel
-            selectedCell={selectedCell}
-            onClearSelection={() => setSelectedCell(null)}
-            getBookingStatus={getBookingStatus}
-            rooms={rooms}
-            selectedDate={selectedDate}
-            isEditMode={isEditMode}
-            bookings={bookings}
-            onBookingsChange={setBookings}
-          />
+          selectedCell={selectedCell}
+          onClearSelection={() => setSelectedCell(null)}
+          getBookingStatus={getBookingStatus}
+          rooms={rooms}
+          selectedDate={selectedDate}
+          isEditMode={isEditMode}
+          bookings={bookings}
+          onBookingsChange={setBookings}
+        />
       </div>
     </div>
   );
