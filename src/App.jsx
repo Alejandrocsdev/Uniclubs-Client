@@ -41,6 +41,7 @@ function App() {
           {/* Public Routes */}
           <Route element={<AuthLayout />}>
             <Route path="/sign-in" element={<Sign />} />
+            <Route path="/sign-up" element={<Sign />} />
             <Route path="/recovery/password" element={<Recovery />} />
           </Route>
 

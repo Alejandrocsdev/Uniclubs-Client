@@ -20,9 +20,9 @@ function EmailAddon() {
   } = useFormContext();
 
   const getPurpose = () => {
-    if (pathname === '/sign-up') return 'sign-up';
-    if (pathname === '/recovery/password') return 'pwd-reset';
-    if (pathname === '/recovery/username') return 'usr-recover';
+    if (pathname === '/sign-up') return 'sign-up:user';
+    if (pathname === '/recovery/password') return 'reset:password';
+    if (pathname === '/recovery/username') return 'recover:username';
     return '';
   };
 
@@ -39,7 +39,7 @@ function EmailAddon() {
     setIsSubmitting(true);
 
     await api(
-      axiosPublic.post('/api/auth/email/otp', { email, purpose: getPurpose() }),
+      axiosPublic.post('/api/auth/email-otp', { email, purpose: getPurpose() }),
       {
         onSuccess: () => {
           setSucMsg('OTP sent successfully.');

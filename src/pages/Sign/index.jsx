@@ -49,7 +49,7 @@ function Sign() {
   };
 
   const onSignUp = async formData => {
-    await api(axiosPrivate.post('/api/auth/sign-up', formData), {
+    await api(axiosPrivate.post('/api/auth/sign-up/user', formData), {
       onSuccess: () => {
         setSucMsg('Sign up successfully.');
         navigate('/sign-in');
