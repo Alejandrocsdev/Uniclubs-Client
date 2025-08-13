@@ -145,7 +145,7 @@ function Sign() {
               <span className={S.switchText}>
                 {isSignIn ? 'New to Gamech?' : 'Already have an account?'}
               </span>
-              <Anchor style={S.switchLink} int={isSignIn ? '/sign-up' : '/sign-in'}>
+              <Anchor style={S.switchLink} int={isSignIn ? '/user/sign-up' : '/sign-in'}>
                 {isSignIn ? 'Sign Up' : 'Sign In'}
               </Anchor>
             </div>

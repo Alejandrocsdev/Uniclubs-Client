@@ -45,7 +45,7 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/" element={<LandingPage />} />
               <Route path="/sign-in" element={<Sign />} />
-              <Route path="/sign-up" element={<Sign />} />
+              <Route path="/user/sign-up" element={<Sign />} />
               <Route path="/recovery/password" element={<Recovery />} />
               <Route path="/recovery/username" element={<Recovery />} />
             </Route>
