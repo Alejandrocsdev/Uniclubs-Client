@@ -33,7 +33,7 @@ function Sign() {
   useUpdateEffect(() => reset(), [isSignIn]);
 
   const onSignIn = async formData => {
-    await api(axiosPrivate.post('/api/auth/sign-in/user', formData), {
+    await api(axiosPrivate.post('/api/auth/sign-in', formData), {
       onSuccess: async () => {
         setSucMsg('Sign in successfully. Redirecting...');
         console.log('Sign in successful, fetching user data...');
