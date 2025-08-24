@@ -129,7 +129,7 @@ function Header() {
                       hover:shadow-md hover:shadow-purple-500/20
                       flex items-center gap-2 group
                     "
-                    onClick={() => { navigate('/dev/booking') }}
+                    onClick={() => { navigate('/booking') }}
                   >
                     <Calendar className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                     <span className="font-medium">Booking</span>
@@ -278,7 +278,7 @@ function Header() {
                     {user && <SheetClose asChild>
                       <button
                         className="text-left text-base py-2 px-2 rounded hover:bg-white/10 flex items-center gap-2"
-                        onClick={() => { navigate('/dev/booking') }}
+                        onClick={() => { navigate('/booking') }}
                       >
                         <Calendar className="h-4 w-4" />
                         Booking
