@@ -223,6 +223,8 @@ const BookingTable = ({
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [showNotification, setShowNotification] = useState(null);
   const [showConflictConfirm, setShowConflictConfirm] = useState(null);
+  const [showDuplicateDateConfirm, setShowDuplicateDateConfirm] = useState(null);
+  const [showCannotCancelConfirm, setShowCannotCancelConfirm] = useState(null);
   const [isControlPanelCollapsed, setIsControlPanelCollapsed] = useState(true);
   
   // 新增：时间设置状态
@@ -539,19 +541,19 @@ const BookingTable = ({
       return (
         baseClass +
         (isPast ? 'opacity-50 bg-gray-100 text-black' : '') +
-        'bg-booking-user text-white hover:opacity-90'
+        'bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105'
       );
     }
     
     // Determine room status based on occupancy
-    const occupancyRatio = bookings.length / capacity;
+    // const occupancyRatio = bookings.length / capacity;
     let statusClass = '';
-    if (occupancyRatio >= 1) {
-      statusClass = 'bg-booking-occupied text-white hover:opacity-90';
-    } else {
-      // Any booking that's not full is "open to join"
-      statusClass = 'bg-booking-partial text-white hover:opacity-90';
-    }
+    // if (occupancyRatio >= 1) {
+    //   statusClass = 'bg-booking-occupied text-white hover:opacity-90';
+    // } else {
+    //   // Any booking that's not full is "open to join"
+    //   statusClass = 'bg-booking-partial text-white hover:opacity-90';
+    // }
     return (
       baseClass +
       (isPast ? 'opacity-50 bg-gray-100 text-black' : '') +
@@ -601,6 +603,43 @@ const BookingTable = ({
           selectedDate.getMonth() === today.getMonth() &&
           selectedDate.getDate() < today.getDate()));
 
+    // 新增：检查用户在选择的日期下是否已有其他尚未发生的预订
+    const userBookingsOnSelectedDate = bookings.filter(booking => 
+      booking.date === dateStr && 
+      booking.bookedBy === user?.username
+    );
+    
+    if (userBookingsOnSelectedDate.length > 0) {
+      // 检查这些预订是否都是已过去的
+      const hasFutureBookings = userBookingsOnSelectedDate.some(booking => {
+        const [slotHour, slotMin] = booking.timeSlot.split(':').map(Number);
+        const bookingMins = slotHour * 60 + slotMin;
+        
+        if (isBeforeToday) {
+          return false; // 过去的日期
+        } else if (isToday) {
+          const nowMins = today.getHours() * 60 + today.getMinutes();
+          return bookingMins > nowMins; // 今天的时间段
+        } else {
+          return true; // 未来的日期
+        }
+      });
+      
+      if (hasFutureBookings) {
+        setShowDuplicateDateConfirm({
+          date: dateStr,
+          existingBookings: userBookingsOnSelectedDate,
+          newBooking: {
+            roomId,
+            timeSlot,
+            playerCount: parseInt(selectedPlayers, 10),
+            userLevel: selectedLevel
+          }
+        });
+        return;
+      }
+    }
+
     let isPastTime = false;
     if (isBeforeToday) {
       isPastTime = true;
@@ -647,23 +686,14 @@ const BookingTable = ({
       return;
     }
 
-    // 1. 如果用户在同时段有其他预订，显示确认对话框
-    if (userBookingInTimeSlot && userBookingInTimeSlot.roomId !== roomId) {
-      setShowConflictConfirm({
-        timeSlot,
-        newRoomId: roomId,
-        existingBooking: userBookingInTimeSlot
-      });
-      return;
-    }
-
     // 执行预订操作
-    executeBooking(roomId, timeSlot, dateStr, selectedPlayerCount);
+    executeBooking(roomId, timeSlot, dateStr, selectedPlayerCount, selectedLevel);
     onCellSelect(cellId);
   };
 
-  const executeBooking = (roomId, timeSlot, dateStr, playerCount) => {
-    console.log('Creating booking with level:', selectedLevel);
+  const executeBooking = (roomId, timeSlot, dateStr, playerCount, userLevelOverride = null) => {
+    const levelToUse = userLevelOverride || selectedLevel;
+    console.log('Creating booking with level:', levelToUse);
     
     // 添加新预订
     const newBooking = {
@@ -673,7 +703,7 @@ const BookingTable = ({
       date: dateStr,
       status: 'occupied',
       bookedBy: user?.username,
-      userLevel: selectedLevel,
+      userLevel: levelToUse,
       userEmail: user?.email,
       players: playerCount,
     };
@@ -693,14 +723,29 @@ const BookingTable = ({
     );
 
     // 添加新预订
-    executeBooking(newRoomId, timeSlot, dateStr, selectedPlayerCount);
+    executeBooking(newRoomId, timeSlot, dateStr, selectedPlayerCount, selectedLevel);
     
-    setShowConflictConfirm(null);
     onCellSelect(`${newRoomId}-${timeSlot}`);
   };
 
-  const handleConflictCancel = () => {
-    setShowConflictConfirm(null);
+  const handleDuplicateDateConfirm = () => {
+    const { date, existingBookings, newBooking } = showDuplicateDateConfirm;
+    const dateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : todayStr;
+    
+    // 移除该日期下的所有现有预订
+    setBookings(prevBookings => 
+      prevBookings.filter(booking => 
+        !(booking.date === date && booking.bookedBy === user?.username)
+      )
+    );
+
+    // 添加新预订 - 使用保存的新预订信息
+    if (newBooking) {
+      executeBooking(newBooking.roomId, newBooking.timeSlot, dateStr, newBooking.playerCount, newBooking.userLevel);
+    }
+    
+    setShowDuplicateDateConfirm(null);
+    onCellSelect(`${newBooking.roomId}-${newBooking.timeSlot}`);
   };
 
   const toggleAxis = () => {
@@ -935,7 +980,7 @@ const BookingTable = ({
           {/* {isEditMode ? 'Exit Edit' : 'Edit Mode'} */}
         </Button>
       </div>
-      <Card className="p-4 mb-2 shadow-lg border-0">
+      <Card className="p-4 mb-2 shadow-lg border-0 bg-slate-800/90 backdrop-blur-sm border-slate-700/50">
         <div className="flex flex-col ">
           {/* 始终可见的核心控制选项 */}
           <div className={`flex ${
@@ -950,11 +995,11 @@ const BookingTable = ({
                 : 'flex-col sm:flex-row gap-2 sm:gap-3'
             }`}>
               <Select value={selectedPlayers} onValueChange={value => setSelectedPlayers(value)}>
-                <SelectTrigger className={
+                <SelectTrigger className={`${
                   isControlPanelCollapsed 
                     ? 'w-[90px]' 
                     : 'w-full sm:w-[140px]'
-                }>
+                } bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500`}>
                   <User className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Players" />
                 </SelectTrigger>
@@ -967,11 +1012,11 @@ const BookingTable = ({
               </Select>
 
               <Select value={selectedLevel} onValueChange={value => setSelectedLevel(value)}>
-                <SelectTrigger className={
+                <SelectTrigger className={`${
                   isControlPanelCollapsed 
                     ? 'w-[180px]' 
                     : 'w-full sm:w-[180px]'
-                }>
+                } bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500`}>
                   <Settings className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Level" />
                 </SelectTrigger>
@@ -1012,7 +1057,7 @@ const BookingTable = ({
               {/* Filter 选择器 - 只在未折叠时显示 */}
               {!isControlPanelCollapsed && (
                 <Select value={filter} onValueChange={value => setFilter(value)}>
-                  <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectTrigger className="w-full sm:w-[140px] bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500">
                     <Filter className="mr-2 h-4 w-4" />
                     <SelectValue placeholder="Filter" />
                   </SelectTrigger>
@@ -1051,9 +1096,9 @@ const BookingTable = ({
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6">
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground min-w-[80px]">Opening Hours:</span>
+                      <span className="text-sm font-medium text-white min-w-[80px]">Opening Hours:</span>
                       <Select value={startTime} onValueChange={setStartTime}>
-                        <SelectTrigger className="w-full sm:w-[100px]">
+                        <SelectTrigger className="w-full sm:w-[100px] bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500">
                           <SelectValue placeholder="Start" />
                         </SelectTrigger>
                         <SelectContent className="max-h-[200px] overflow-y-auto">
@@ -1064,9 +1109,9 @@ const BookingTable = ({
                           ))}
                         </SelectContent>
                       </Select>
-                      <span className="text-sm text-muted-foreground">to</span>
+                      <span className="text-sm text-slate-300">to</span>
                       <Select value={endTime} onValueChange={setEndTime}>
-                        <SelectTrigger className="w-full sm:w-[100px]">
+                        <SelectTrigger className="w-full sm:w-[100px] bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500">
                           <SelectValue placeholder="End" />
                         </SelectTrigger>
                         <SelectContent className="max-h-[200px] overflow-y-auto">
@@ -1092,34 +1137,14 @@ const BookingTable = ({
                         <div className="w-4 h-4 bg-card rounded"
                             style={{ border: '1px solid rgb(149, 155, 167)' }}
                         ></div>
-                        <span>Available</span>
+                        <span className="text-slate-200">Available</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-user rounded"></div>
-                        <span>My Booking</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-partial rounded"></div>
-                        <span>Open to Join</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-occupied rounded"></div>
-                        <span>Full</span>
-                      </div>
-                  
-                    </div>
-                    <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-beginner rounded-full"></div>
-                        <span>Beginner</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-intermediate rounded-full"></div>
-                        <span>Intermediate</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 bg-booking-advanced rounded-full"></div>
-                        <span>Advanced</span>
+                        <div 
+                          className="w-4 h-4 rounded" 
+                          style={{ background: 'var(--booking-user)' }}
+                        ></div>
+                        <span className="text-slate-200">My Booking</span>
                       </div>
                     </div>
                   </div>
@@ -1134,34 +1159,11 @@ const BookingTable = ({
                       <div className="w-4 h-4 bg-card rounded"
                           style={{ border: '1px solid rgb(149, 155, 167)' }}
                       ></div>
-                      <span>Available</span>
+                      <span className="text-slate-200">Available</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-user rounded"></div>
-                      <span>My Booking</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-partial rounded"></div>
-                      <span>Open to Join</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-occupied rounded"></div>
-                      <span>Full</span>
-                    </div>
-                
-                  </div>
-                  <div className="flex flex-wrap gap-2 text-sm overflow-x-auto justify-end">
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-beginner rounded-full"></div>
-                      <span>Beginner</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-intermediate rounded-full"></div>
-                      <span>Intermediate</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-booking-advanced rounded-full"></div>
-                      <span>Advanced</span>
+                      <div style={{ background: 'var(--booking-user)' }} className="w-4 h-4 bg-booking-user rounded"></div>
+                      <span className="text-slate-200">My Booking</span>
                     </div>
                   </div>
                 </div>
@@ -1172,14 +1174,14 @@ const BookingTable = ({
       </Card>
 
       {/* Table */}
-      <Card className="overflow-hidden shadow-lg mb-2 border-0">
+      <Card className="overflow-hidden shadow-lg mb-2 border-0 bg-slate-800/90 backdrop-blur-sm border-slate-700/50">
         <div
-          className="overflow-auto bg-white w-full"
+          className="overflow-auto bg-slate-700/60 w-full"
           ref={tableScrollRef}
         >
           {isHorizontalTime ? (
             // Time horizontal, rooms vertical
-            <div className="p-1 bg-gray-50" style={{ width: 'max-content' }}>
+            <div className="p-1 bg-slate-600/60" style={{ width: 'max-content' }}>
               <div
                 className="grid gap-0.5"
                 style={{
@@ -1188,7 +1190,7 @@ const BookingTable = ({
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border border-gray-400 p-2 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
+                  className="bg-slate-600/90 border border-slate-500 p-2 font-bold text-base sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
                     width: isEditMode ? 140 : 80, 
                     minWidth: isEditMode ? 140 : 80, 
@@ -1197,10 +1199,10 @@ const BookingTable = ({
                 >
                   <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full h-full p-1 text-[15px] font-bold hover:bg-grid-hover justify-center text-center leading-tight"
-                      >
+                                              <Button
+                          variant="ghost"
+                          className="w-full h-full p-1 text-[16px] font-bold hover:bg-slate-500/50 justify-center text-center leading-tight text-white"
+                        >
                         <CalendarIcon className="h-4 w-4 hidden sm:inline-block" />
                         {format(selectedDate, 'MMM dd')}
                       </Button>
@@ -1225,7 +1227,7 @@ const BookingTable = ({
                   <div
                     key={time}
                     ref={el => (timeHeaderRefs.current[idx] = el)}
-                    className="bg-grid-header border border-gray-400 p-3 text-center font-medium text-sm sticky top-0 z-20 shadow-sm rounded-sm"
+                    className="bg-slate-600/90 border border-slate-500 p-3 text-center font-bold text-base text-white sticky top-0 z-20 shadow-sm rounded-sm"
                     style={{ 
                       width: 70, 
                       minWidth: 70, 
@@ -1240,7 +1242,7 @@ const BookingTable = ({
                   .map(room => [
                     <div
                       key={`${room.id}-header`}
-                      className="bg-grid-header border border-gray-400 p-3 font-medium text-sm flex items-center sticky left-0 z-20 h-full shadow-sm rounded-sm"
+                      className="bg-slate-600/90 border border-slate-500 p-3 font-bold text-base flex items-center sticky left-0 z-20 h-full shadow-sm rounded-sm"
                       style={{ 
                         width: isEditMode ? 140 : 80, 
                         minWidth: isEditMode ? 140 : 80, 
@@ -1250,8 +1252,8 @@ const BookingTable = ({
                       <div className="flex flex-col w-full h-full justify-center space-y-1">
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col flex-1 min-w-0">
-                            <span className="font-semibold text-sm whitespace-nowrap">{room.name}</span>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">{room.capacity} players</span>
+                                                    <span className="font-semibold text-sm whitespace-nowrap text-white">{room.name}</span>
+                        <span className="text-xs text-slate-300 whitespace-nowrap">{room.capacity} players</span>
                           </div>
                           {isEditMode && (
                             <div className="flex items-center space-x-1 ml-2">
@@ -1285,7 +1287,7 @@ const BookingTable = ({
             </div>
           ) : (
             // Rooms horizontal, time vertical
-            <div className="min-w-full p-1 bg-gray-50">
+            <div className="min-w-full p-1 bg-slate-600/60">
               <div
                 className="grid gap-0.5"
                 style={{
@@ -1294,7 +1296,7 @@ const BookingTable = ({
               >
                 {/* Header row */}
                 <div
-                  className="bg-grid-header border border-gray-400 p-2 font-semibold text-sm sticky top-0 left-0 z-30 shadow-sm rounded-sm"
+                  className="bg-slate-600/90 border border-slate-600 p-2 font-bold text-base sticky top-0 left-0 z-30 shadow-sm rounded-sm"
                   style={{ 
                     width: isEditMode ? 140 : 100, 
                     minWidth: isEditMode ? 140 : 100, 
@@ -1303,10 +1305,10 @@ const BookingTable = ({
                 >
                   <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="w-full h-full p-1 text-[10px] font-semibold hover:bg-grid-hover justify-center text-center leading-tight"
-                      >
+                                              <Button
+                          variant="ghost"
+                          className="w-full h-full p-1 text-[12px] font-bold hover:bg-slate-500/50 justify-center text-center leading-tight text-white"
+                        >
                         {format(selectedDate, 'MMM dd')}
                       </Button>
                     </PopoverTrigger>
@@ -1329,12 +1331,12 @@ const BookingTable = ({
                 {filteredRooms.map(room => (
                   <div
                     key={room.id}
-                    className="bg-grid-header border border-gray-400 p-2 text-center font-medium text-sm sticky top-0 z-20 relative shadow-sm rounded-sm"
+                    className="bg-slate-600/90 border border-slate-500 p-2 text-center font-bold text-base sticky top-0 z-20 relative shadow-sm rounded-sm"
                     style={{ width: 90, minWidth: 90, maxWidth: 90 }}
                   >
                     <div className="flex flex-col items-center space-y-1">
-                      <div className="font-semibold text-sm w-full text-center whitespace-nowrap">{room.name}</div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">{room.capacity}p</div>
+                      <div className="font-semibold text-sm w-full text-center whitespace-nowrap text-white">{room.name}</div>
+                      <div className="text-xs text-slate-300 whitespace-nowrap">{room.capacity}p</div>
                       
                       {isEditMode && (
                         <div className="flex items-center space-x-1">
@@ -1366,7 +1368,7 @@ const BookingTable = ({
                   .map(time => [
                     <div
                       key={`${time}-header`}
-                      className="bg-grid-header border border-gray-400 p-3 font-medium text-sm flex items-center justify-center sticky left-0 z-20 shadow-sm rounded-sm"
+                      className="bg-slate-600/90 border border-slate-500 p-3 font-bold text-base flex items-center justify-center sticky left-0 z-20 shadow-sm rounded-sm"
                       style={{ 
                         width: isEditMode ? 140 : 100, 
                         minWidth: isEditMode ? 140 : 100, 
@@ -1404,15 +1406,15 @@ const BookingTable = ({
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={cancelDeleteRoom}
         >
-          <Card 
-            className="p-6 max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
+                  <Card 
+          className="p-6 max-w-md mx-4 bg-slate-800/95 backdrop-blur-sm border-slate-700/50"
+          onClick={(e) => e.stopPropagation()}
+        >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Confirm Delete</h3>
-              <p className="text-sm text-muted-foreground">
-                Are you sure you want to delete this field? This action will also remove all bookings for this field and cannot be undone.
-              </p>
+                          <h3 className="text-lg font-semibold text-white">Confirm Delete</h3>
+            <p className="text-sm text-slate-300">
+              Are you sure you want to delete this field? This action will also remove all bookings for this field and cannot be undone.
+            </p>
               <div className="flex flex-col sm:flex-row gap-2 justify-end">
                 <Button 
                   variant="outline" 
@@ -1440,16 +1442,16 @@ const BookingTable = ({
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           onClick={handleCancelEdit}
         >
-          <Card 
-            className="p-6 max-w-md mx-4 w-full"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Edit Field</h3>
+                  <Card 
+          className="p-6 max-w-md mx-4 w-full bg-slate-800/95 backdrop-blur-sm border-slate-700/50"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Edit Field</h3>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-sm font-medium text-white">
                     Field Name *
                   </label>
                   <input
@@ -1457,14 +1459,14 @@ const BookingTable = ({
                     value={editRoomName}
                     onChange={(e) => setEditRoomName(e.target.value)}
                     placeholder="e.g: Field 10"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                     autoFocus
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-sm font-medium text-white">
                     Capacity
                   </label>
                   <Select value={editRoomCapacity} onValueChange={setEditRoomCapacity}>
@@ -1510,11 +1512,11 @@ const BookingTable = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Add New Field</h3>
+              <h3 className="text-lg font-semibold text-white">Add New Field</h3>
               
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-sm font-medium text-white">
                     Field Name *
                   </label>
                   <input
@@ -1522,14 +1524,14 @@ const BookingTable = ({
                     value={newRoomName}
                     onChange={(e) => setNewRoomName(e.target.value)}
                     placeholder="e.g: Field 10"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     required
                     autoFocus
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
+                  <label className="text-sm font-medium text-white">
                     Capacity
                   </label>
                   <Select value={newRoomCapacity} onValueChange={setNewRoomCapacity}>
@@ -1575,35 +1577,80 @@ const BookingTable = ({
         </div>
       )}
 
-      {/* Conflict Confirmation Modal */}
-      {showConflictConfirm && (
+      {/* Duplicate Date Confirmation Modal */}
+      {showDuplicateDateConfirm && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={handleConflictCancel}
+          onClick={() => setShowDuplicateDateConfirm(null)}
         >
           <Card 
             className="p-6 max-w-md mx-4 w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Conflict Detected</h3>
-              <p className="text-sm text-muted-foreground">
-                You already have a booking for this time slot at{' '}
-                <strong>{rooms.find(r => r.id === showConflictConfirm.existingBooking.roomId)?.name || showConflictConfirm.existingBooking.roomId}</strong>. 
-                Would you like to replace it with your new booking for{' '}
-                <strong>{rooms.find(r => r.id === showConflictConfirm.newRoomId)?.name || showConflictConfirm.newRoomId}</strong>?
-              </p>
+              <h3 className="text-lg font-semibold">You already have a booking</h3>
+              <div className="text-sm text-slate-500 mb-3">
+                Replace it with your new booking?
+              </div>
+                
+                {/* 简化的预订对比 */}
+                <div className="space-y-2">
+                  {/* 现有预订 */}
+                  <div className="flex items-center justify-between p-2.5 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <div className="text-sm font-medium text-gray-700">
+                          {rooms.find(r => r.id === showDuplicateDateConfirm.existingBookings[0]?.roomId)?.name || 'Field'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {showDuplicateDateConfirm.existingBookings[0]?.timeSlot} • {showDuplicateDateConfirm.existingBookings[0]?.players} player(s)
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {showDuplicateDateConfirm.existingBookings[0]?.userLevel}
+                    </div>
+                  </div>
+
+                  {/* 箭头 */}
+                  <div className="flex justify-center -my-1">
+                    <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* 新预订 */}
+                  {showDuplicateDateConfirm?.newBooking && (
+                    <div className="flex items-center justify-between p-2.5 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <div className="text-sm font-medium text-green-700">
+                            {rooms.find(r => r.id === showDuplicateDateConfirm.newBooking.roomId)?.name || 'Field'}
+                          </div>
+                          <div className="text-xs text-green-600">
+                            {showDuplicateDateConfirm.newBooking.timeSlot} • {showDuplicateDateConfirm.newBooking.playerCount} player(s)
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-xs text-green-600">
+                        {showDuplicateDateConfirm.newBooking.userLevel}
+                      </div>
+                    </div>
+                  )}
+                </div>
               <div className="flex flex-col sm:flex-row gap-2 justify-end">
                 <Button 
                   variant="outline" 
-                  onClick={handleConflictCancel}
+                  onClick={() => setShowDuplicateDateConfirm(null)}
                   className="flex-1 sm:flex-none"
                 >
                   Cancel
                 </Button>
                 <Button 
                   variant="default" 
-                  onClick={handleConflictConfirm}
+                  onClick={handleDuplicateDateConfirm}
                   className="flex-1 sm:flex-none"
                 >
                   Replace Booking

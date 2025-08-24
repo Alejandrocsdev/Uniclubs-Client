@@ -215,14 +215,14 @@ const MemberManagement = () => {
     if (isEditing) {
       return (
         <div className="flex items-center gap-2 mt-2">
-          <Input
-            type={field === 'validThrough' ? 'date' : field === 'email' ? 'email' : 'text'}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="h-11 text-base flex-1"
-            autoFocus
-          />
+                      <Input
+              type={field === 'validThrough' ? 'date' : field === 'email' ? 'email' : 'text'}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="h-11 text-base flex-1 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-slate-500 focus:ring-slate-500"
+              autoFocus
+            />
           <Button
             size="sm"
             variant="ghost"
@@ -245,10 +245,10 @@ const MemberManagement = () => {
 
     return (
       <div 
-        className="flex items-center justify-between cursor-pointer hover:bg-muted/30 rounded-md px-3 py-3 group transition-colors min-h-[48px]"
+        className="flex items-center justify-between cursor-pointer hover:bg-slate-700/50 rounded-md px-3 py-3 group transition-colors min-h-[48px]"
         onClick={() => startEditing(member.id, field, value)}
       >
-        <span className="flex-1 text-base">{displayValue}</span>
+        <span className="flex-1 text-base text-slate-200">{displayValue}</span>
         <Edit3 className="h-5 w-5 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />
       </div>
     );
@@ -261,14 +261,14 @@ const MemberManagement = () => {
     if (isEditing) {
       return (
         <div className="flex items-center gap-2 min-h-[48px]">
-          <Input
-            type={field === 'validThrough' ? 'date' : field === 'email' ? 'email' : 'text'}
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-            className="h-9 text-sm flex-1"
-            autoFocus
-          />
+            <Input
+              type={field === 'validThrough' ? 'date' : field === 'email' ? 'email' : 'text'}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              className="h-9 text-sm flex-1 bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-slate-500 focus:ring-slate-500"
+              autoFocus
+            />
           <Button
             size="sm"
             variant="ghost"
@@ -291,10 +291,10 @@ const MemberManagement = () => {
 
     return (
       <div 
-        className="flex items-center gap-2 cursor-pointer hover:bg-muted/30 rounded-md px-3 py-2 group min-h-[48px] transition-colors"
+        className="flex items-center gap-2 cursor-pointer hover:bg-slate-700/50 rounded-md px-3 py-2 group min-h-[48px] transition-colors"
         onClick={() => startEditing(member.id, field, value)}
       >
-        <span className="flex-1 text-sm">{displayValue}</span>
+        <span className="flex-1 text-sm text-slate-200">{displayValue}</span>
         <Edit3 className="h-4 w-4 opacity-0 group-hover:opacity-60 transition-opacity flex-shrink-0" />
       </div>
     );
@@ -308,7 +308,7 @@ const MemberManagement = () => {
     const isExpanded = expandedCards.has(member.id);
     
     return (
-      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white/90">
+      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-slate-800/90 backdrop-blur-sm hover:bg-slate-800/95 border-slate-700/50">
         <CardContent className={`${isExpanded ? 'p-4' : 'p-3'}`}>
           {/* 基本信息行 */}
           <div className={`flex items-center justify-between ${isExpanded ? 'mb-3' : 'mb-2'}`}>
@@ -317,7 +317,7 @@ const MemberManagement = () => {
                 <Users className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h3 className={`font-semibold ${isExpanded ? 'text-lg' : 'text-base'}`}>{member.name}</h3>
+                <h3 className={`font-semibold ${isExpanded ? 'text-lg' : 'text-base'} text-white`}>{member.name}</h3>
                 <div className="flex items-center gap-2">
                   {/* <p className="text-xs text-muted-foreground">{member.id}</p> */}
                     <>
@@ -357,19 +357,19 @@ const MemberManagement = () => {
           {isExpanded && (
             <div className="space-y-0 pt-4 border-t">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Email</label>
+                <label className="text-sm font-medium text-slate-300">Email</label>
                 {renderEditableCellMobile(member, 'email', member.email)}
               </div>
               
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Joined Date</label>
-                <div className="px-3 py-3 text-base">
-                  {formatDate(member.joinedDate)}
-                </div>
+                <label className="text-sm font-medium text-slate-300">Joined Date</label>
+                                  <div className="px-3 py-3 text-base text-slate-200">
+                    {formatDate(member.joinedDate)}
+                  </div>
               </div>
               
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Valid Through</label>
+                <label className="text-sm font-medium text-slate-300">Valid Through</label>
                 {renderEditableCellMobile(member, 'validThrough', member.validThrough, formatDate(member.validThrough))}
               </div>
             </div>
@@ -380,20 +380,20 @@ const MemberManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 relative">
       {/* 背景装饰模式 */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(59,130,246,0.08)_0%,transparent_50%),radial-gradient(circle_at_75%_75%,rgba(99,102,241,0.08)_0%,transparent_50%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(17,24,39,0.1)_0%,transparent_50%),radial-gradient(circle_at_75%_75%,rgba(17,24,39,0.1)_0%,transparent_50%)] pointer-events-none"></div>
       
       <div className="relative p-4 md:p-6 lg:p-10 xl:p-12">
         <div className="max-w-7xl mx-auto space-y-6">
-          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+          <Card className="shadow-lg border-0 bg-slate-800/90 backdrop-blur-sm border-slate-700/50">
             <CardHeader className="pb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <Users className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
-                  <CardTitle className="text-2xl sm:text-3xl font-bold">Member Management</CardTitle>
+                  <CardTitle className="text-2xl sm:text-3xl font-bold text-white">Member Management</CardTitle>
                 </div>
-                <div className="text-sm sm:text-base text-muted-foreground font-medium">
+                <div className="text-sm sm:text-base text-slate-300 font-medium">
                   Total {filteredMembers.length} members
                 </div>
               </div>
@@ -402,18 +402,18 @@ const MemberManagement = () => {
               {/* 搜索和筛选区域 - 移动端优化 */}
               <div className="flex flex-col gap-4">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <Input
                     placeholder="Search member name, email or ID..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 h-12 text-base"
+                    className="pl-12 h-12 text-base bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-slate-500 focus:ring-slate-500"
                   />
                 </div>
                 <div className="flex items-center gap-3">
-                  <Filter className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  <Filter className="h-5 w-5 text-slate-400 flex-shrink-0" />
                   <Select value={filterType} onValueChange={setFilterType}>
-                    <SelectTrigger className="flex-1 sm:flex-none sm:w-[200px] h-12">
+                    <SelectTrigger className="flex-1 sm:flex-none sm:w-[200px] h-12 bg-slate-700/50 border-slate-600 text-white focus:border-slate-500 focus:ring-slate-500">
                       <SelectValue placeholder="Member Type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -428,17 +428,17 @@ const MemberManagement = () => {
               </div>
 
               {/* 桌面端表格视图 */}
-              <div className="hidden lg:block border rounded-xl shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm">
+              <div className="hidden lg:block border border-slate-700/50 rounded-xl shadow-lg overflow-hidden bg-slate-800/60 backdrop-blur-sm">
                 <Table>
-                  <TableHeader className="bg-blue-50/60">
+                  <TableHeader className="bg-slate-700/60">
                     <TableRow>
-                      <TableHead className="py-4 px-6 font-semibold">Member ID</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Name</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Member Type</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Joined Date</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Valid Through</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Status</TableHead>
-                      <TableHead className="py-4 px-6 font-semibold">Email</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Member ID</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Name</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Member Type</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Joined Date</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Valid Through</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Status</TableHead>
+                      <TableHead className="py-4 px-6 font-semibold text-white">Email</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -448,8 +448,8 @@ const MemberManagement = () => {
                       const expired = isExpired(member.validThrough);
                       
                       return (
-                        <TableRow key={member.id} className="hover:bg-muted/20 transition-colors">
-                          <TableCell className="font-medium py-5 px-6">{member.id}</TableCell>
+                        <TableRow key={member.id} className="hover:bg-slate-700/40 transition-colors">
+                          <TableCell className="font-medium py-5 px-6 text-slate-200">{member.id}</TableCell>
                           <TableCell className="py-5 px-6">
                             {renderEditableCell(member, 'name', member.name)}
                           </TableCell>
@@ -458,7 +458,7 @@ const MemberManagement = () => {
                               {memberTypeDisplay.text}
                             </Badge>
                           </TableCell>
-                          <TableCell className="py-5 px-6">{formatDate(member.joinedDate)}</TableCell>
+                          <TableCell className="py-5 px-6 text-slate-200">{formatDate(member.joinedDate)}</TableCell>
                           <TableCell className="py-5 px-6">
                             {renderEditableCell(member, 'validThrough', member.validThrough, formatDate(member.validThrough))}
                           </TableCell>
@@ -495,15 +495,15 @@ const MemberManagement = () => {
               {/* 无数据状态 */}
               {filteredMembers.length === 0 && (
                 <div className="text-center py-16">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-                  <p className="text-xl font-medium text-muted-foreground mb-2">No matching members found</p>
-                  <p className="text-base text-muted-foreground">Try adjusting your search criteria or filters</p>
+                                  <Users className="h-16 w-16 text-slate-400 mx-auto mb-6" />
+                <p className="text-xl font-medium text-slate-300 mb-2">No matching members found</p>
+                <p className="text-base text-slate-400">Try adjusting your search criteria or filters</p>
                 </div>
               )}
 
               {/* 帮助文本 */}
-              <div className="mt-8 p-4 bg-blue-50/60 rounded-lg border-l-4 border-primary backdrop-blur-sm">
-                <p className="text-sm text-muted-foreground">
+              <div className="mt-8 p-4 bg-slate-700/60 rounded-lg border-l-4 border-primary backdrop-blur-sm">
+                <p className="text-sm text-slate-300">
                   💡 Click on Name, Email, or Valid Through fields to edit them directly.{' '}
                   <span className="lg:hidden">On mobile devices, tap the expand button to view more details.</span>
                 </p>

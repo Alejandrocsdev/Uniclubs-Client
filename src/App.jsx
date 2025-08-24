@@ -52,12 +52,6 @@ function App() {
               <Route path="/recovery/username" element={<Recovery />} />
             </Route>
 
-            <Route element={<MainLayout />}>
-              <Route path="/dev/booking" element={<Booking />} />
-              <Route path="/member-management" element={<MemberManagement />} />
-              <Route path="/profile" element={<Profile />} />
-            </Route>
-
             {/* Private Routes */}
             <Route
               element={
@@ -68,7 +62,7 @@ function App() {
                 <Route path="/booking" element={<Booking />} />
                 <Route path="/member-management" element={<MemberManagement />} />
                 <Route path="/components" element={<Components />} />
-                {/* <Route path="/profile" element={<Profile />} /> */}
+                <Route path="/profile" element={<Profile />} />
               </Route>
             </Route>
 

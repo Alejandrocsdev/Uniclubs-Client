@@ -89,7 +89,7 @@ a {
   --booking-advanced: 270 100% 70%;
   --booking-half-full: 25 95% 53%;
   --booking-partial: 48 100% 67%;
-  --booking-user: 180 70% 50%;
+  --booking-user: linear-gradient(to bottom right, hsl(270, 100%, 75%), hsl(330, 100%, 75%), hsl(210, 100%, 75%));
 
   /* Grid colors */
   --grid-header: 210 25% 92%;

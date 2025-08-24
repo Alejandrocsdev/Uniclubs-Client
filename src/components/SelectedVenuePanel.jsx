@@ -18,6 +18,7 @@ const SelectedVenuePanel = ({
   const { user } = useAuth();
   const [deleteConfirmBooking, setDeleteConfirmBooking] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showCannotCancelConfirm, setShowCannotCancelConfirm] = useState(null);
 
   const handleDeleteBooking = (booking) => {
     setDeleteConfirmBooking(booking);
@@ -79,20 +80,55 @@ const SelectedVenuePanel = ({
 
   // 处理离开预订
   const handleLeaveBooking = () => {
-    if (!showLeaveConfirm) {
-      setShowLeaveConfirm(true);
+    // 新增：检查预订是否已经开始三分钟
+    if (isToday && !isPastTime) {
+      const [slotHour, slotMin] = timeSlot.split(':').map(Number);
+      const slotMins = slotHour * 60 + slotMin;
+      const nowMins = today.getHours() * 60 + today.getMinutes();
+      const timeDiff = nowMins - slotMins;
+      
+      if (timeDiff >= 0 && timeDiff <= 3) {
+        // 预订已经开始但未超过3分钟，仍然可以取消
+        if (!showLeaveConfirm) {
+          setShowLeaveConfirm(true);
+        } else {
+          if (userBooking && onBookingsChange) {
+            const updatedBookings = bookings.filter(booking => booking.id !== userBooking.id);
+            setShowLeaveConfirm(false);
+            onBookingsChange(updatedBookings);
+            onClearSelection();
+          }
+        }
+      } else if (timeDiff > 3) {
+        // 预订已经开始超过3分钟，无法取消
+        setShowCannotCancelConfirm({
+          timeSlot,
+          startTime: `${slotHour.toString().padStart(2, '0')}:${slotMin.toString().padStart(2, '0')}`,
+          elapsedMinutes: timeDiff
+        });
+        return;
+      }
     } else {
-      if (userBooking && onBookingsChange) {
-        const updatedBookings = bookings.filter(booking => booking.id !== userBooking.id);
-        setShowLeaveConfirm(false);
-        onBookingsChange(updatedBookings);
-        onClearSelection();
+      // 非今天或已过去的时间，正常处理
+      if (!showLeaveConfirm) {
+        setShowLeaveConfirm(true);
+      } else {
+        if (userBooking && onBookingsChange) {
+          const updatedBookings = bookings.filter(booking => booking.id !== userBooking.id);
+          setShowLeaveConfirm(false);
+          onBookingsChange(updatedBookings);
+          onClearSelection();
+        }
       }
     }
   };
 
   const cancelLeave = () => {
     setShowLeaveConfirm(false);
+  };
+
+  const handleCannotCancelConfirm = () => {
+    setShowCannotCancelConfirm(null);
   };
 
   const handleClearSelection = () => {
@@ -112,7 +148,7 @@ const SelectedVenuePanel = ({
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Booking Details</h3>
+            <h3 className="text-lg font-semibold text-foreground">Booking Details</h3>
             <Button
               variant="ghost"
               size="icon"
@@ -124,63 +160,45 @@ const SelectedVenuePanel = ({
           </div>
 
           {/* Room Info */}
-          <div>
-            <div className="text-xl font-bold">{room?.name}</div>
-            <div className="text-sm text-muted-foreground">
-              Capacity: {room?.capacity}
-            </div>
-            <div className="text-sm text-muted-foreground mt-1">
-              Time: {timeSlot} - {nextSlot}
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="text-lg font-semibold text-gray-700">{room?.name}</div>
+            <div className="text-sm text-gray-500 mt-1">
+              Capacity: {room?.capacity} • Time: {timeSlot} - {nextSlot}
             </div>
           </div>
 
           {/* Players */}
           {booking.length > 0 && (
-            <div className="space-y-1">
-              <div className="font-bold text-base">
-                Players ( {booking.reduce((sum, book) => sum + book.players, 0)} / {room?.capacity} )
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-foreground">
+                Players ({booking.reduce((sum, book) => sum + book.players, 0)} / {room?.capacity})
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="space-y-2">
                 {booking.map((book, i) => (
                   <div 
                     key={`${book.id}-${i}`} 
-                    className={`flex items-center gap-3 justify-between p-3 rounded-lg border ${
+                    className={`flex items-center justify-between p-2.5 rounded-lg border ${
                       book.bookedBy === user?.username 
-                        ? 'bg-blue-50 border-blue-200 ring-2 ring-blue-300' 
+                        ? 'bg-blue-50 border-blue-200' 
                         : 'bg-gray-50 border-gray-200'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                          book.userLevel === 'advanced'
-                            ? 'bg-booking-advanced text-white'
-                            : book.userLevel === 'intermediate'
-                            ? 'bg-booking-intermediate text-white'
-                            : 'bg-booking-beginner text-white'
-                        }`}
-                      >
-                        {book.userLevel === 'advanced' 
-                          ? 'Advanced' 
-                          : book.userLevel === 'intermediate'
-                          ? 'Intermediate'
-                          : 'Beginner'}
-                      </span>
-                      <span className="text-base font-medium flex items-center gap-2">
-                        {book.bookedBy === user?.username ? (
-                          <span className="flex items-center gap-2">
-                            <strong className="text-blue-700">You</strong>
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
-                              Your Booking
-                            </span>
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <div className="text-sm font-medium flex items-center gap-2">
+                          {book.bookedBy === user?.username ? (
+                            <span className="text-blue-700 font-semibold">You</span>
+                          ) : (
+                            <span className="text-gray-700">{book.bookedBy}</span>
+                          )}
+                          <span className="text-xs text-muted-foreground">
+                            ({book.players} player{book.players > 1 ? 's' : ''})
                           </span>
-                        ) : (
-                          book.bookedBy
-                        )}
-                        <span className="flex flex-row text-sm font-medium text-muted-foreground">
-                          ( {book.players} <User className="pt-1 h-4 w-4" /> )
-                        </span>
-                      </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {book.userLevel}
+                        </div>
+                      </div>
                     </div>
                     {isEditMode && (
                       <Button
@@ -200,35 +218,35 @@ const SelectedVenuePanel = ({
           )}
 
           {/* Availability Notice and Action Button */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {isPastTime ? (
               // 时段已过
-              <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg">
-                <div className="text-gray-500 font-semibold">Time Slot Passed</div>
+              <div className="p-3 bg-gray-100 border border-gray-300 rounded-lg">
+                <div className="text-gray-700 font-medium">Time Slot Passed</div>
                 <div className="text-gray-500 text-sm mt-1">
                   This time slot has already passed.
                 </div>
               </div>
             ) : hasUserBooking ? (
               // 用户已有预订 - 显示成功加入状态
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="text-blue-800 font-semibold">Successfully Joined</div>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="text-blue-700 font-medium">Successfully Joined</div>
                 <div className="text-blue-600 text-sm mt-1">
                   You have successfully joined this time slot.
                 </div>
               </div>
             ) : remaining === 0 ? (
               // 已满
-              <div className="p-4 bg-gray-100 border border-gray-300 rounded-lg">
-                <div className="text-gray-500 font-semibold">Full</div>
+              <div className="p-3 bg-gray-100 border border-gray-300 rounded-lg">
+                <div className="text-gray-700 font-medium">Full</div>
                 <div className="text-gray-500 text-sm mt-1">
                   This slot is full.
                 </div>
               </div>
             ) : (
               // 可预订
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="text-green-800 font-semibold">Available</div>
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="text-green-700 font-medium">Available</div>
                 <div className="text-green-600 text-sm mt-1">
                   This slot has {remaining} spot{remaining > 1 ? 's' : ''} left for joining.
                 </div>
@@ -239,9 +257,18 @@ const SelectedVenuePanel = ({
             {!isPastTime && (
               hasUserBooking ? (
                 <div className="space-y-2">
+                  {showLeaveConfirm && (
+                    <Button
+                      onClick={cancelLeave}
+                      variant="outline"
+                      className="w-full sm:flex-none font-semibold py-2"
+                    >
+                      Cancel
+                    </Button>
+                  )}
                   <Button
                     onClick={handleLeaveBooking}
-                    className={`w-full rounded-full font-semibold py-2 ${
+                    className={`w-full sm:flex-none font-semibold py-2 ${
                       showLeaveConfirm 
                         ? 'bg-red-600 hover:bg-red-700 text-white' 
                         : 'bg-red-500 hover:bg-red-600 text-white'
@@ -249,15 +276,6 @@ const SelectedVenuePanel = ({
                   >
                     {showLeaveConfirm ? 'Confirm Leave' : 'Leave'}
                   </Button>
-                  {showLeaveConfirm && (
-                    <Button
-                      onClick={cancelLeave}
-                      variant="outline"
-                      className="w-full rounded-full font-semibold py-2"
-                    >
-                      Cancel
-                    </Button>
-                  )}
                 </div>
               ) : remaining > 0 ? (
                 <Button
@@ -278,7 +296,7 @@ const SelectedVenuePanel = ({
             onClick={cancelDeleteBooking}
           >
             <Card 
-              className="p-6 max-w-md mx-4"
+              className="p-6 max-w-md mx-4 w-full"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="space-y-4">
@@ -300,6 +318,35 @@ const SelectedVenuePanel = ({
                     className="flex-1 sm:flex-none"
                   >
                     Delete Booking
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Cannot Cancel Booking Modal */}
+        {showCannotCancelConfirm && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={handleCannotCancelConfirm}
+          >
+            <Card 
+              className="p-6 max-w-md mx-4 w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Cannot Cancel Booking</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your booking at <strong>{showCannotCancelConfirm.startTime}</strong> has already started for {showCannotCancelConfirm.elapsedMinutes} minute(s). 
+                  Bookings cannot be cancelled after they have started for more than 3 minutes.
+                </p>
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleCannotCancelConfirm}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    OK
                   </Button>
                 </div>
               </div>
