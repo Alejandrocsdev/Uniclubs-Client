@@ -308,7 +308,7 @@ const MemberManagement = () => {
     const isExpanded = expandedCards.has(member.id);
     
     return (
-      <Card className="shadow-sm hover:shadow-md transition-shadow">
+      <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:bg-white/90">
         <CardContent className={`${isExpanded ? 'p-4' : 'p-3'}`}>
           {/* 基本信息行 */}
           <div className={`flex items-center justify-between ${isExpanded ? 'mb-3' : 'mb-2'}`}>
@@ -380,10 +380,13 @@ const MemberManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="p-4 md:p-6 lg:p-10 xl:p-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative">
+      {/* 背景装饰模式 */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(59,130,246,0.08)_0%,transparent_50%),radial-gradient(circle_at_75%_75%,rgba(99,102,241,0.08)_0%,transparent_50%)] pointer-events-none"></div>
+      
+      <div className="relative p-4 md:p-6 lg:p-10 xl:p-12">
         <div className="max-w-7xl mx-auto space-y-6">
-          <Card className="shadow-sm">
+          <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
             <CardHeader className="pb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -425,9 +428,9 @@ const MemberManagement = () => {
               </div>
 
               {/* 桌面端表格视图 */}
-              <div className="hidden lg:block border rounded-xl shadow-sm overflow-hidden">
+              <div className="hidden lg:block border rounded-xl shadow-lg overflow-hidden bg-white/60 backdrop-blur-sm">
                 <Table>
-                  <TableHeader className="bg-muted/30">
+                  <TableHeader className="bg-blue-50/60">
                     <TableRow>
                       <TableHead className="py-4 px-6 font-semibold">Member ID</TableHead>
                       <TableHead className="py-4 px-6 font-semibold">Name</TableHead>
@@ -499,7 +502,7 @@ const MemberManagement = () => {
               )}
 
               {/* 帮助文本 */}
-              <div className="mt-8 p-4 bg-muted/20 rounded-lg border-l-4 border-primary">
+              <div className="mt-8 p-4 bg-blue-50/60 rounded-lg border-l-4 border-primary backdrop-blur-sm">
                 <p className="text-sm text-muted-foreground">
                   💡 Click on Name, Email, or Valid Through fields to edit them directly.{' '}
                   <span className="lg:hidden">On mobile devices, tap the expand button to view more details.</span>

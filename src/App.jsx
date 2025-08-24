@@ -25,6 +25,7 @@ import Home from './pages/Home';
 import Booking from './pages/Booking';
 import Components from './pages/Components';
 import MemberManagement from './pages/MemberManagement';
+import Profile from './pages/Profile';
 
 function App() {
   const { loading, error } = useLoader();
@@ -43,6 +44,7 @@ function App() {
           <Routes>
             {/* Landing Page - Public Route */}
             <Route element={<MainLayout />}>
+              <Route path="/home" element={<Home />} />
               <Route path="/" element={<LandingPage />} />
               <Route path="/sign-in" element={<Sign />} />
               <Route path="/user/sign-up" element={<Sign />} />
@@ -53,6 +55,7 @@ function App() {
             <Route element={<MainLayout />}>
               <Route path="/dev/booking" element={<Booking />} />
               <Route path="/member-management" element={<MemberManagement />} />
+              <Route path="/profile" element={<Profile />} />
             </Route>
 
             {/* Private Routes */}
@@ -62,10 +65,10 @@ function App() {
               }
             >
               <Route element={<MainLayout />}>
-                <Route path="/home" element={<Home />} />
                 <Route path="/booking" element={<Booking />} />
-                {/* <Route path="/member-management" element={<MemberManagement />} /> */}
+                <Route path="/member-management" element={<MemberManagement />} />
                 <Route path="/components" element={<Components />} />
+                {/* <Route path="/profile" element={<Profile />} /> */}
               </Route>
             </Route>
 

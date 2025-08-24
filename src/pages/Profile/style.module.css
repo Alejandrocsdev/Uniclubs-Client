@@ -1,0 +1,451 @@
+/* Main Container */
+.main {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Pattern */
+.backgroundPattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(17, 24, 39, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(17, 24, 39, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Profile Grid */
+.profileGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+/* User Info Card */
+.userInfoCard {
+  background: rgba(31, 41, 55, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.userInfoCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.5);
+}
+
+.userInfoContent {
+  padding: 2rem;
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.avatarContainer {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #4b5563;
+  box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4);
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(75, 85, 99, 0.5);
+}
+
+.avatarFallback {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.statusIndicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.userDetails {
+  flex: 1;
+  display: flex;
+  text-align: left;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.username {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f9fafb;
+  margin: 0;
+}
+
+.userEmail {
+  font-size: 1.125rem;
+  color: #d1d5db;
+  margin: 0;
+}
+
+.userStats {
+  display: flex;
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(75, 85, 99, 0.2);
+  border-radius: 12px;
+  color: #e5e7eb;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.statIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Roles Section */
+.rolesSection {
+  margin-top: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f9fafb;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionIcon {
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+}
+
+.rolesGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.roleBadge {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.roleBadge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(75, 85, 99, 0.4);
+}
+
+/* QR Code Card */
+.qrCard {
+  background: rgba(31, 41, 55, 0.9);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.qrCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.5);
+}
+
+.qrHeader {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  border-bottom: none;
+}
+
+.qrTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.qrIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.qrDescription {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.qrContent {
+  padding: 2rem;
+}
+
+.qrDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrWrapper {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.qrWrapper:hover {
+  transform: scale(1.02);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.qrCode {
+  display: block;
+}
+
+.qrActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.downloadButton {
+  background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.downloadButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(75, 85, 99, 0.4);
+}
+
+/* User ID Section */
+.userIdSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(75, 85, 99, 0.15);
+  border: 1px solid rgba(75, 85, 99, 0.2);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.userIdSection:hover {
+  background: rgba(75, 85, 99, 0.2);
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+.userIdInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userIdIcon {
+  width: 20px;
+  height: 20px;
+  color: #9ca3af;
+}
+
+.userIdText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.userIdLabel {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.userIdValue {
+  font-size: 1rem;
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.copyButton {
+  padding: 0.5rem;
+  min-width: auto;
+  color: #9ca3af;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.copyButton:hover {
+  background: rgba(75, 85, 99, 0.2);
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .heroTitle {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .floatingBackButton {
+    top: 1rem;
+    left: 1rem;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1.125rem;
+  }
+  
+  .userInfoContent,
+  .qrContent {
+    padding: 1.5rem;
+  }
+  
+  .userHeader {
+    flex-direction: row;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .username {
+    font-size: 1.75rem;
+  }
+  
+  .userStats {
+    justify-content: center;
+  }
+  
+  .qrHeader {
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .qrTitle {
+    font-size: 1.25rem;
+  }
+  
+  .qrWrapper {
+    padding: 1.25rem;
+  }
+  
+  .qrCode {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 2rem;
+  }
+  
+  .heroSubtitle {
+    font-size: 1rem;
+  }
+  
+  .userInfoContent,
+  .qrContent {
+    padding: 1rem;
+  }
+  
+  .avatar {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .username {
+    font-size: 1.5rem;
+  }
+  
+  .userEmail {
+    font-size: 1rem;
+  }
+  
+  .qrCode {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .userIdSection {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
