@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { TIME_MARGIN_MINUTES, TIME_SLOT_DURATION } from '@/config/booking';
 
 // Sample data
 const initialRooms = [
@@ -202,14 +203,17 @@ const BookingTable = ({
   selectedDate: externalSelectedDate,
   onSelectedDateChange,
   isEditMode: externalIsEditMode,
-  onEditModeChange
+  onEditModeChange,
+  selectedPlayers: externalSelectedPlayers,
+  onSelectedPlayersChange
 }) => {
   const { user } = useAuth();
+  
   const [isHorizontalTime, setIsHorizontalTime] = useState(true);
   const [selectedDate, setSelectedDate] = useState(externalSelectedDate || new Date());
   const [filter, setFilter] = useState('all');
   const [bookings, setBookings] = useState(externalBookings || initialBookings);
-  const [selectedPlayers, setSelectedPlayers] = useState('1');
+  const [selectedPlayers, setSelectedPlayers] = useState(externalSelectedPlayers || '1');
   const [selectedLevel, setSelectedLevel] = useState('intermediate');
   const [rooms, setRooms] = useState(initialRooms);
   const [editRoomName, setEditRoomName] = useState('');
@@ -275,6 +279,13 @@ const BookingTable = ({
     }
   }, [externalIsEditMode]);
 
+  // 同步外部传入的 selectedPlayers
+  useEffect(() => {
+    if (externalSelectedPlayers !== undefined) {
+      setSelectedPlayers(externalSelectedPlayers);
+    }
+  }, [externalSelectedPlayers]);
+
   // 当内部 bookings 状态改变时，通知父组件
   useEffect(() => {
     if (onBookingsChange) {
@@ -295,6 +306,13 @@ const BookingTable = ({
       onEditModeChange(isEditMode);
     }
   }, [isEditMode, onEditModeChange]);
+
+  // 当内部 selectedPlayers 状态改变时，通知父组件
+  useEffect(() => {
+    if (onSelectedPlayersChange) {
+      onSelectedPlayersChange(selectedPlayers);
+    }
+  }, [selectedPlayers, onSelectedPlayersChange]);
 
   // 新增：滚动监听 useEffect
   // useEffect(() => {
@@ -432,7 +450,7 @@ const BookingTable = ({
       const header = timeHeaderRefs.current[closestIdx];
       const container = tableScrollRef.current;
       if (header && container) {
-        container.scrollLeft = header.offsetLeft - 120; // 120 為左側欄寬
+        container.scrollLeft = header.offsetLeft - 155;
       }
     }
   }, [isHorizontalTime, currentTimeSlots]);
@@ -482,6 +500,34 @@ const BookingTable = ({
 
   const filteredRooms = rooms.filter(room => shouldShowRoom(room.id));
 
+  // 计算时间比例的函数
+  const getTimeProgressRatio = (timeSlot) => {
+    const today = new Date();
+    const isToday =
+      selectedDate &&
+      today.getFullYear() === selectedDate.getFullYear() &&
+      today.getMonth() === selectedDate.getMonth() &&
+      today.getDate() === selectedDate.getDate();
+
+    if (!isToday) return 0;
+
+    const [slotHour, slotMin] = timeSlot.split(':').map(Number);
+    const slotMins = slotHour * 60 + slotMin;
+    const nowMins = today.getHours() * 60 + today.getMinutes();
+    
+    // 如果时间段还没开始，返回0
+    if (slotMins >= nowMins) return 0;
+    
+    // 计算时间段长度
+    const timeSlotDuration = TIME_SLOT_DURATION; // 从配置文件读取
+    
+    // 计算已经过去的时间比例（考虑缓冲时间）
+    const elapsedMins = nowMins - slotMins;
+    const ratio = Math.min(elapsedMins / timeSlotDuration, 1);
+    
+    return ratio;
+  };
+
   const getCellClass = (roomId, timeSlot) => {
     const bookings = getBookingStatus(roomId, timeSlot);
     const cellId = `${roomId}-${timeSlot}`;
@@ -519,7 +565,8 @@ const BookingTable = ({
       const [slotHour, slotMin] = timeSlot.split(':').map(Number);
       const nowMins = today.getHours() * 60 + today.getMinutes();
       const slotMins = slotHour * 60 + slotMin;
-      if (slotMins < nowMins) {
+      // 使用时间缓冲常量：只有超过时间段开始时间指定分钟后才标记为过去
+      if (slotMins + TIME_MARGIN_MINUTES < nowMins) {
         isPast = true;
       }
     }
@@ -536,12 +583,12 @@ const BookingTable = ({
       );
     }
     
-    // 如果有当前用户的预订，使用特殊颜色
+    // 如果有当前用户的预订，使用特殊颜色（即使过期也要保持强调）
     if (hasUserBooking) {
       return (
         baseClass +
-        (isPast ? 'opacity-50 bg-gray-100 text-black' : '') +
-        'bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105'
+        'bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400 shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105' +
+        (isPast ? ' opacity-70' : '') // 过期时只降低透明度，保持颜色
       );
     }
     
@@ -561,34 +608,29 @@ const BookingTable = ({
     );
   };
 
-  const handleCellClick = (roomId, timeSlot) => {
-    const cellId = `${roomId}-${timeSlot}`;
-    const dateStr = selectedDate
-      ? selectedDate.toISOString().slice(0, 10)
-      : todayStr;
-    
-    // 检查是否已有预订
-    const existingBookings = getBookingStatus(roomId, timeSlot);
-    const room = rooms.find(r => r.id === roomId);
-    const capacity = room?.capacity || 0;
-    
-    // 1. 检查当前用户在当前时间段的所有场地是否已有预订
-    const userBookingInTimeSlot = bookings.find(booking => 
-      booking.timeSlot === timeSlot && 
-      booking.date === dateStr && 
-      booking.bookedBy === user?.username
-    );
-    
-    // 检查当前用户在当前场地和时间段是否已有预订
-    const userBookingInCurrentRoom = existingBookings.find(booking => booking.bookedBy === user?.username);
-    
-    // 如果用户在当前房间已有预订，直接切换选择状态
-    if (userBookingInCurrentRoom) {
-      onCellSelect(selectedCell === cellId ? null : cellId);
-      return;
-    }
-
-    // 4. 检查时段是否已过
+  /**
+   * 预订规则检查函数
+   * 
+   * 检查用户是否可以预订指定的时间段和场地
+   * 
+   * @param {string} roomId - 场地ID
+   * @param {string} timeSlot - 时间段 (格式: "HH:MM")
+   * @param {string} dateStr - 日期字符串 (格式: "YYYY-MM-DD")
+   * 
+   * @returns {Object} 检查结果对象
+   * @returns {boolean} returns.canBook - 是否可以预订
+   * @returns {string} returns.reason - 不能预订的原因代码
+   * @returns {string} returns.message - 用户友好的错误消息
+   * @returns {Array} [returns.existingBookings] - 现有预订列表（仅在重复日期时）
+   * 
+   * 预订规则：
+   * 1. 不能预订过去的日期
+   * 2. 不能预订已过的时间段
+   * 3. 场地容量不能超限
+   * 4. 同一用户不能在同一个场地和时间段重复预订
+   * 5. 同一用户在同一天只能有一个预订（需要替换现有预订）
+   */
+  const checkBookingRules = (roomId, timeSlot, dateStr) => {
     const today = new Date();
     const isToday = selectedDate &&
       today.getFullYear() === selectedDate.getFullYear() &&
@@ -603,7 +645,65 @@ const BookingTable = ({
           selectedDate.getMonth() === today.getMonth() &&
           selectedDate.getDate() < today.getDate()));
 
-    // 新增：检查用户在选择的日期下是否已有其他尚未发生的预订
+    // 规则1: 检查日期是否已过
+    if (isBeforeToday) {
+      return { 
+        canBook: false, 
+        reason: 'date_passed',
+        message: 'Cannot book for past dates.' 
+      };
+    }
+
+    // 规则2: 检查时间段是否已过（今天的时间段）
+    if (isToday) {
+      const [slotHour, slotMin] = timeSlot.split(':').map(Number);
+      const nowMins = today.getHours() * 60 + today.getMinutes();
+      const slotMins = slotHour * 60 + slotMin;
+      
+      // 使用时间缓冲常量：只有超过时间段开始时间指定分钟后才标记为过去
+      if (slotMins + TIME_MARGIN_MINUTES < nowMins) {
+        return { 
+          canBook: false, 
+          reason: 'time_passed',
+          message: 'This time slot has already passed.' 
+        };
+      }
+    }
+
+    // 规则3: 检查场地容量
+    const existingBookings = getBookingStatus(roomId, timeSlot);
+    const room = rooms.find(r => r.id === roomId);
+    const capacity = room?.capacity || 0;
+    const currentPlayerCount = existingBookings.reduce((total, booking) => total + booking.players, 0);
+    const selectedPlayerCount = parseInt(selectedPlayers, 10);
+
+    if (currentPlayerCount >= capacity) {
+      return { 
+        canBook: false, 
+        reason: 'room_full',
+        message: 'This time slot is full.' 
+      };
+    }
+
+    if (currentPlayerCount + selectedPlayerCount > capacity) {
+      return { 
+        canBook: false, 
+        reason: 'insufficient_capacity',
+        message: `Cannot add ${selectedPlayerCount} player(s). Only ${capacity - currentPlayerCount} spot(s) available.` 
+      };
+    }
+
+    // 规则4: 检查用户是否已有预订
+    const userBookingInCurrentRoom = existingBookings.find(booking => booking.bookedBy === user?.username);
+    if (userBookingInCurrentRoom) {
+      return { 
+        canBook: false, 
+        reason: 'already_booked_room',
+        message: 'You already have a booking in this room for this time slot.' 
+      };
+    }
+
+    // 规则5: 检查同日期下是否有其他预订
     const userBookingsOnSelectedDate = bookings.filter(booking => 
       booking.date === dateStr && 
       booking.bookedBy === user?.username
@@ -626,9 +726,38 @@ const BookingTable = ({
       });
       
       if (hasFutureBookings) {
+        return { 
+          canBook: false, 
+          reason: 'duplicate_date',
+          message: 'You already have other bookings on this date.',
+          existingBookings: userBookingsOnSelectedDate
+        };
+      }
+    }
+
+    // 所有规则都通过
+    return { 
+      canBook: true, 
+      reason: 'success',
+      message: 'Booking is allowed.' 
+    };
+  };
+
+  const handleCellClick = (roomId, timeSlot) => {
+    const cellId = `${roomId}-${timeSlot}`;
+    const dateStr = selectedDate
+      ? selectedDate.toISOString().slice(0, 10)
+      : todayStr;
+    
+    // 使用统一的预订规则检查
+    const ruleCheck = checkBookingRules(roomId, timeSlot, dateStr);
+    
+    if (!ruleCheck.canBook) {
+      // 处理重复日期的情况
+      if (ruleCheck.reason === 'duplicate_date') {
         setShowDuplicateDateConfirm({
           date: dateStr,
-          existingBookings: userBookingsOnSelectedDate,
+          existingBookings: ruleCheck.existingBookings,
           newBooking: {
             roomId,
             timeSlot,
@@ -638,48 +767,11 @@ const BookingTable = ({
         });
         return;
       }
-    }
-
-    let isPastTime = false;
-    if (isBeforeToday) {
-      isPastTime = true;
-    } else if (isToday) {
-      const [slotHour, slotMin] = timeSlot.split(':').map(Number);
-      const nowMins = today.getHours() * 60 + today.getMinutes();
-      const slotMins = slotHour * 60 + slotMin;
-      if (slotMins < nowMins) {
-        isPastTime = true;
-      }
-    }
-
-    if (isPastTime) {
+      
+      // 显示其他错误信息
       setShowNotification({
         type: 'error',
-        message: 'This time slot has already passed. Please select another time slot.'
-      });
-      setTimeout(() => setShowNotification(null), 3000);
-      onCellSelect(cellId); // 仍然显示面板
-      return;
-    }
-
-    // 2. 检查此时段此球场是否已满
-    const currentPlayerCount = existingBookings.reduce((total, booking) => total + booking.players, 0);
-    if (currentPlayerCount >= capacity) {
-      setShowNotification({
-        type: 'error',
-        message: 'This time slot is full. Please select another time slot.'
-      });
-      setTimeout(() => setShowNotification(null), 3000);
-      onCellSelect(cellId); // 仍然显示面板
-      return;
-    }
-
-    // 3. 检查预约人数是否会超过容量
-    const selectedPlayerCount = parseInt(selectedPlayers, 10);
-    if (currentPlayerCount + selectedPlayerCount > capacity) {
-      setShowNotification({
-        type: 'error',
-        message: `Cannot add ${selectedPlayerCount} player(s). Only ${capacity - currentPlayerCount} spot(s) available. Please select another time slot.`
+        message: ruleCheck.message
       });
       setTimeout(() => setShowNotification(null), 3000);
       onCellSelect(cellId); // 仍然显示面板
@@ -687,7 +779,7 @@ const BookingTable = ({
     }
 
     // 执行预订操作
-    executeBooking(roomId, timeSlot, dateStr, selectedPlayerCount, selectedLevel);
+    executeBooking(roomId, timeSlot, dateStr, parseInt(selectedPlayers, 10), selectedLevel);
     onCellSelect(cellId);
   };
 
@@ -728,24 +820,61 @@ const BookingTable = ({
     onCellSelect(`${newRoomId}-${timeSlot}`);
   };
 
+  /**
+   * 处理重复日期确认
+   * 
+   * 当用户在同一天有多个预订时，此函数会：
+   * 1. 移除该日期下的所有现有预订
+   * 2. 添加新的预订
+   * 3. 更新UI状态
+   * 4. 显示操作结果通知
+   */
   const handleDuplicateDateConfirm = () => {
     const { date, existingBookings, newBooking } = showDuplicateDateConfirm;
-    const dateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : todayStr;
     
-    // 移除该日期下的所有现有预订
-    setBookings(prevBookings => 
-      prevBookings.filter(booking => 
-        !(booking.date === date && booking.bookedBy === user?.username)
-      )
-    );
-
-    // 添加新预订 - 使用保存的新预订信息
-    if (newBooking) {
-      executeBooking(newBooking.roomId, newBooking.timeSlot, dateStr, newBooking.playerCount, newBooking.userLevel);
+    if (!newBooking) {
+      console.error('No new booking information found');
+      setShowDuplicateDateConfirm(null);
+      return;
     }
-    
-    setShowDuplicateDateConfirm(null);
-    onCellSelect(`${newBooking.roomId}-${newBooking.timeSlot}`);
+
+    try {
+      // 步骤1: 移除该日期下的所有现有预订
+      setBookings(prevBookings => 
+        prevBookings.filter(booking => 
+          !(booking.date === date && booking.bookedBy === user?.username)
+        )
+      );
+
+      // 步骤2: 添加新预订
+      const dateStr = selectedDate ? selectedDate.toISOString().slice(0, 10) : todayStr;
+      executeBooking(
+        newBooking.roomId, 
+        newBooking.timeSlot, 
+        dateStr, 
+        newBooking.playerCount, 
+        newBooking.userLevel
+      );
+      
+      // 步骤3: 清理状态并选择新预订的单元格
+      setShowDuplicateDateConfirm(null);
+      onCellSelect(`${newBooking.roomId}-${newBooking.timeSlot}`);
+      
+      // 步骤4: 显示成功通知
+      setShowNotification({
+        type: 'success',
+        message: `Successfully replaced existing booking with new booking for ${newBooking.timeSlot}`
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+      
+    } catch (error) {
+      console.error('Error in handleDuplicateDateConfirm:', error);
+      setShowNotification({
+        type: 'error',
+        message: 'Failed to replace booking. Please try again.'
+      });
+      setTimeout(() => setShowNotification(null), 3000);
+    }
   };
 
   const toggleAxis = () => {
@@ -843,6 +972,8 @@ const BookingTable = ({
     const booking = getBookingStatus(roomId, timeSlot);
     const cellClass = getCellClass(roomId, timeSlot);
     const room = rooms.find(r => r.id === roomId);
+    const timeProgressRatio = getTimeProgressRatio(timeSlot);
+    const hasUserBooking = booking && booking.some(book => book.bookedBy === user?.username);
 
     if (booking.length == 0) {
       return (
@@ -852,6 +983,15 @@ const BookingTable = ({
           onClick={() => handleCellClick(roomId, timeSlot)}
           title="Available"
         >
+          {/* 时间进度遮罩 - 空单元格使用标准透明度 */}
+          {timeProgressRatio > 0 && (
+            <div 
+              className="absolute inset-0 bg-gray-800/60 pointer-events-none"
+              style={{ 
+                clipPath: `polygon(0 0, ${timeProgressRatio * 100}% 0, ${timeProgressRatio * 100}% 100%, 0 100%)` 
+              }}
+            />
+          )}
           {/* <div className="text-xs text-grey-100">0/{room.capacity}</div> */}
         </div>
       );
@@ -865,7 +1005,18 @@ const BookingTable = ({
               className={cellClass}
               onClick={() => handleCellClick(roomId, timeSlot)}
             >
-              <div className="text-center space-y-1">
+              {/* 时间进度遮罩 - 用户预订时使用更透明的遮罩 */}
+              {timeProgressRatio > 0 && (
+                <div 
+                  className={`absolute inset-0 pointer-events-none z-10 ${
+                    hasUserBooking ? 'bg-gray-800/30' : 'bg-gray-800/60'
+                  }`}
+                  style={{ 
+                    clipPath: `polygon(0 0, ${timeProgressRatio * 100}% 0, ${timeProgressRatio * 100}% 100%, 0 100%)` 
+                  }}
+                />
+              )}
+              <div className="text-center space-y-1 relative z-20">
                 <div className="grid grid-cols-2 gap-1 justify-center">
                   {/* 显示所有预订的总玩家数 */}
                   {Array.from({ 
@@ -1217,6 +1368,12 @@ const BookingTable = ({
                             setIsDatePickerOpen(false);
                           }
                         }}
+                        disabled={(date) => {
+                          // 禁用今天之前的日期
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return date < today;
+                        }}
                         initialFocus
                         className={cn('p-3 pointer-events-auto')}
                       />
@@ -1252,7 +1409,7 @@ const BookingTable = ({
                       <div className="flex flex-col w-full h-full justify-center space-y-1">
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col flex-1 min-w-0">
-                                                    <span className="font-semibold text-sm whitespace-nowrap text-white">{room.name}</span>
+                          <span className="font-semibold text-sm whitespace-nowrap text-white">{room.name}</span>
                         <span className="text-xs text-slate-300 whitespace-nowrap">{room.capacity} players</span>
                           </div>
                           {isEditMode && (
@@ -1321,6 +1478,12 @@ const BookingTable = ({
                             setSelectedDate(date);
                             setIsDatePickerOpen(false);
                           }
+                        }}
+                        disabled={(date) => {
+                          // 禁用今天之前的日期
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          return date < today;
                         }}
                         initialFocus
                         className={cn('p-3 pointer-events-auto')}

@@ -4,6 +4,7 @@ import { Card } from './ui/card';
 import { X, User, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { timeSlots } from './BookingTable';
+import { TIME_MARGIN_MINUTES } from '@/config/booking';
 
 const SelectedVenuePanel = ({
   selectedCell,
@@ -14,8 +15,10 @@ const SelectedVenuePanel = ({
   isEditMode,
   bookings,
   onBookingsChange,
+  selectedPlayers,
 }) => {
   const { user } = useAuth();
+  
   const [deleteConfirmBooking, setDeleteConfirmBooking] = useState(null);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showCannotCancelConfirm, setShowCannotCancelConfirm] = useState(null);
@@ -73,22 +76,22 @@ const SelectedVenuePanel = ({
     const [slotHour, slotMin] = timeSlot.split(':').map(Number);
     const nowMins = today.getHours() * 60 + today.getMinutes();
     const slotMins = slotHour * 60 + slotMin;
-    if (slotMins < nowMins) {
+    // 使用时间缓冲常量：只有超过时间段开始时间指定分钟后才标记为过去
+    if (slotMins + TIME_MARGIN_MINUTES < nowMins) {
       isPastTime = true;
     }
   }
 
   // 处理离开预订
   const handleLeaveBooking = () => {
-    // 新增：检查预订是否已经开始三分钟
+    // 新增：检查预订是否已经开始缓冲时间
     if (isToday && !isPastTime) {
       const [slotHour, slotMin] = timeSlot.split(':').map(Number);
       const slotMins = slotHour * 60 + slotMin;
       const nowMins = today.getHours() * 60 + today.getMinutes();
       const timeDiff = nowMins - slotMins;
-      
-      if (timeDiff >= 0 && timeDiff <= 3) {
-        // 预订已经开始但未超过3分钟，仍然可以取消
+      if (timeDiff < 0) {
+        // 预订还没有开始，可以正常取消
         if (!showLeaveConfirm) {
           setShowLeaveConfirm(true);
         } else {
@@ -99,8 +102,20 @@ const SelectedVenuePanel = ({
             onClearSelection();
           }
         }
-      } else if (timeDiff > 3) {
-        // 预订已经开始超过3分钟，无法取消
+      } else if (timeDiff >= 0 && timeDiff <= TIME_MARGIN_MINUTES) {
+        // 预订已经开始但未超过缓冲时间，仍然可以取消
+        if (!showLeaveConfirm) {
+          setShowLeaveConfirm(true);
+        } else {
+          if (userBooking && onBookingsChange) {
+            const updatedBookings = bookings.filter(booking => booking.id !== userBooking.id);
+            setShowLeaveConfirm(false);
+            onBookingsChange(updatedBookings);
+            onClearSelection();
+          }
+        }
+      } else if (timeDiff > TIME_MARGIN_MINUTES) {
+        // 预订已经开始超过缓冲时间，无法取消
         setShowCannotCancelConfirm({
           timeSlot,
           startTime: `${slotHour.toString().padStart(2, '0')}:${slotMin.toString().padStart(2, '0')}`,
@@ -115,6 +130,7 @@ const SelectedVenuePanel = ({
       } else {
         if (userBooking && onBookingsChange) {
           const updatedBookings = bookings.filter(booking => booking.id !== userBooking.id);
+          console.log('updatedBookings', updatedBookings);
           setShowLeaveConfirm(false);
           onBookingsChange(updatedBookings);
           onClearSelection();
@@ -171,7 +187,7 @@ const SelectedVenuePanel = ({
           {booking.length > 0 && (
             <div className="space-y-2">
               <div className="text-sm font-medium text-foreground">
-                Players ({booking.reduce((sum, book) => sum + book.players, 0)} / {room?.capacity})
+                Players ( {booking.reduce((sum, book) => sum + book.players, 0)} / {room?.capacity} )
               </div>
               <div className="space-y-2">
                 {booking.map((book, i) => (
@@ -229,9 +245,9 @@ const SelectedVenuePanel = ({
               </div>
             ) : hasUserBooking ? (
               // 用户已有预订 - 显示成功加入状态
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="text-blue-700 font-medium">Successfully Joined</div>
-                <div className="text-blue-600 text-sm mt-1">
+              <div className="p-3 bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 border border-purple-200 rounded-lg">
+                <div className="text-purple-700 font-medium">Successfully Joined</div>
+                <div className="text-purple-600 text-sm mt-1">
                   You have successfully joined this time slot.
                 </div>
               </div>
@@ -241,6 +257,14 @@ const SelectedVenuePanel = ({
                 <div className="text-gray-700 font-medium">Full</div>
                 <div className="text-gray-500 text-sm mt-1">
                   This slot is full.
+                </div>
+              </div>
+            ) : parseInt(selectedPlayers) > remaining ? (
+              // 选择人数超过可容纳人数
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <div className="text-orange-700 font-medium">Insufficient Capacity</div>
+                <div className="text-orange-600 text-sm mt-1">
+                  You selected {selectedPlayers} player{parseInt(selectedPlayers) > 1 ? 's' : ''}, but only {remaining} spot{remaining > 1 ? 's' : ''} available.
                 </div>
               </div>
             ) : (
@@ -277,12 +301,19 @@ const SelectedVenuePanel = ({
                     {showLeaveConfirm ? 'Confirm Leave' : 'Leave'}
                   </Button>
                 </div>
-              ) : remaining > 0 ? (
+              ) : remaining > 0 && parseInt(selectedPlayers) <= remaining ? (
                 <Button
                   onClick={handleClearSelection}
                   className="w-full rounded-full font-semibold bg-green-500 hover:bg-green-600 text-white py-2"
                 >
                   Join Now
+                </Button>
+              ) : remaining > 0 && parseInt(selectedPlayers) > remaining ? (
+                <Button
+                  disabled
+                  className="w-full rounded-full font-semibold bg-gray-400 text-gray-600 py-2 cursor-not-allowed"
+                >
+                  Insufficient Capacity
                 </Button>
               ) : null
             )}

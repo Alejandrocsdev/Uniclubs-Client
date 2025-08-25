@@ -52,6 +52,14 @@ function App() {
               <Route path="/recovery/username" element={<Recovery />} />
             </Route>
 
+            {process.env.NODE_ENV === 'development' && (
+              <Route element={<MainLayout />}>
+                <Route path="/dev/booking" element={<Booking />} />
+                <Route path="/dev/member-management" element={<MemberManagement />} />
+                <Route path="/dev/profile" element={<Profile />} />
+              </Route>
+            )}
+            
             {/* Private Routes */}
             <Route
               element={

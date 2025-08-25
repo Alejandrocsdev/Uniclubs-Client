@@ -11,6 +11,7 @@ const Booking = () => {
   const [bookings, setBookings] = useState(sampleBookings);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedPlayers, setSelectedPlayers] = useState('1');
   const { user, logout, loading } = useAuth();
 
   const getBookingStatus = (roomId, timeSlot) => {
@@ -39,6 +40,8 @@ const Booking = () => {
             onSelectedDateChange={setSelectedDate}
             isEditMode={isEditMode}
             onEditModeChange={setIsEditMode}
+            selectedPlayers={selectedPlayers}
+            onSelectedPlayersChange={setSelectedPlayers}
           />
         </div>
         <SelectedVenuePanel
@@ -50,6 +53,7 @@ const Booking = () => {
           isEditMode={isEditMode}
           bookings={bookings}
           onBookingsChange={setBookings}
+          selectedPlayers={selectedPlayers}
         />
       </div>
     </div>
