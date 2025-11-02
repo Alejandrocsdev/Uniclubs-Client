@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import { serverUrl } from '../utils';
 
 // ------- Sports-focused clubs (GameCh brand) -------
 const clubsData = [
@@ -143,7 +144,8 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-	  const SOCKET_URL = 'http://localhost:4000';
+	const SOCKET_URL = serverUrl;
+	console.log('Socket URL:', SOCKET_URL);
 
   const [count, setCount] = useState(0);
   const [socket, setSocket] = useState(null);
@@ -156,6 +158,10 @@ const LandingPage = () => {
     // 2️⃣ Listen for count updates
     newSocket.on('countUpdated', data => {
       setCount(data.count);
+    });
+
+		newSocket.on('connect_error', (err) => {
+      console.error('Socket.IO connect error:', err);
     });
 
     // 3️⃣ Fetch initial count from API
