@@ -14,6 +14,8 @@ import {
   ArrowRight,
   Zap
 } from 'lucide-react';
+import { io } from 'socket.io-client';
+import axios from 'axios';
 
 // ------- Sports-focused clubs (GameCh brand) -------
 const clubsData = [
@@ -141,6 +143,39 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
+	  const SOCKET_URL = 'http://localhost:4000';
+
+  const [count, setCount] = useState(0);
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    // 1️⃣ Connect to Socket.IO
+    const newSocket = io(SOCKET_URL, { withCredentials: true });
+    setSocket(newSocket);
+
+    // 2️⃣ Listen for count updates
+    newSocket.on('countUpdated', data => {
+      setCount(data.count);
+    });
+
+    // 3️⃣ Fetch initial count from API
+    axios
+      .get(`${SOCKET_URL}/api/count`, { withCredentials: true })
+      .then(res => setCount(res.data.count))
+      .catch(console.error);
+
+    // Cleanup
+    return () => newSocket.close();
+  }, []);
+
+  const increment = async () => {
+    await axios.post(
+      `${SOCKET_URL}/api/count/increment`,
+      {},
+      { withCredentials: true }
+    );
+  };
+
   useEffect(() => {
     if (!isAutoPlaying) return;
     const interval = setInterval(() => {
@@ -216,6 +251,43 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+			<section
+      style={{
+        background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'system-ui, sans-serif',
+        color: '#333',
+      }}
+    >
+      <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>🔥 Live Count</h1>
+      <h2 style={{ fontSize: '5rem', color: '#0078D7', marginBottom: '1.5rem' }}>
+        {count}
+      </h2>
+      <button
+        onClick={increment}
+        style={{
+          backgroundColor: '#0078D7',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '12px 24px',
+          fontSize: '1.2rem',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+        onMouseOver={(e) => (e.target.style.backgroundColor = '#005a9e')}
+        onMouseOut={(e) => (e.target.style.backgroundColor = '#0078D7')}
+      >
+        +1
+      </button>
+      <p style={{ marginTop: '2rem', fontSize: '0.9rem', color: '#666' }}>
+        Open this page in multiple tabs — count updates in real time!
+      </p>
+    </section>
 
       {/* Clubs Slider Section */}
       <section id="clubs" className="py-10 md:py-20 relative">
